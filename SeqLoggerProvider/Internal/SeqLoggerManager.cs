@@ -136,11 +136,11 @@ namespace SeqLoggerProvider.Internal
                         content.Headers.ContentType = PayloadContentType;
 
                         if (configuration.ApiKey is not null)
-                            content.Headers.Add("X-Seq-ApiKey", configuration.ApiKey);
+                            content.Headers.Add(SeqLoggerConstants.ApiKeyHeaderName, configuration.ApiKey);
 
                         var deliveryStarted = _systemClock.UtcNow;
                         SeqLoggerLoggerMessages.EventDeliveryStarting(_logger, payloadEventCount, payloadBuffer.Length);
-                        var result = await httpClient.PostAsync("api/events/raw", content, stopToken);
+                        var result = await httpClient.PostAsync(SeqLoggerConstants.EventIngestionApiPath, content, stopToken);
                         if (!result.IsSuccessStatusCode)
                         {
                             SeqLoggerLoggerMessages.EventDeliveryFailed(

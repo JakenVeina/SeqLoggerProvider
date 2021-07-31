@@ -14,7 +14,8 @@ namespace Microsoft.Extensions.Logging
     {
         public static ILoggingBuilder AddSeq(
             this ILoggingBuilder            builder,
-            Action<SeqLoggerConfiguration>? configure = null)
+            Action<SeqLoggerConfiguration>? configure = null,
+            Action<IHttpClientBuilder>?     configureHttpClient = null)
         {
             builder.Services
                 .AddSingleton<ILoggerProvider, SeqLoggerProvider.Internal.SeqLoggerProvider>()
@@ -28,8 +29,11 @@ namespace Microsoft.Extensions.Logging
             if (configure is not null)
                 builder.Services.Configure(configure);
 
-            builder.Services
+            var httpClientBuilder = builder.Services
                 .AddHttpClient(SeqLoggerConstants.HttpClientName);
+
+            if (configureHttpClient is not null)
+                configureHttpClient.Invoke(httpClientBuilder);
 
             return builder;
         }

@@ -2,6 +2,12 @@
 {
     public static class SeqLoggerConstants
     {
+        public const string ApiKeyHeaderName
+            = "X-Seq-ApiKey";
+
+        public const string HttpClientName
+            = "SeqLogger";
+
         public const string JsonSerializerOptionsName
             = "SeqLogger";
 
@@ -14,8 +20,8 @@
         internal const int DefaultMinBatchIntervalSeconds
             = 1;
 
-        internal const string HttpClientName
-            = "SeqLogger";
+        internal const string EventIngestionApiPath
+            = "api/events/raw";
 
         internal const string PayloadMediaType
             = "application/vnd.serilog.clef";
