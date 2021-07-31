@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31507.150
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeqLoggerProvider", "SeqLoggerProvider\SeqLoggerProvider.csproj", "{F6C52B71-4C3D-406D-AE0D-43B41F82A4AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SeqLoggerProvider", "SeqLoggerProvider\SeqLoggerProvider.csproj", "{F6C52B71-4C3D-406D-AE0D-43B41F82A4AB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E8AD6ACB-C0EA-40E1-8F69-B50E7AF913EA}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
