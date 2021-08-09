@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using Microsoft.Extensions.ObjectPool;
 using Microsoft.Extensions.Options;
 
 using SeqLoggerProvider.Json;
@@ -13,7 +15,11 @@ namespace SeqLoggerProvider.Internal.Json
         : JsonConverter<SeqLoggerEvent>
     {
         public SeqLoggerEventJsonConverter(IOptions<SeqLoggerConfiguration> seqLoggerConfiguration)
-            => _seqLoggerConfiguration = seqLoggerConfiguration;
+        {
+            _seqLoggerConfiguration = seqLoggerConfiguration;
+
+            _usedFieldNamesPool = ObjectPool.Create(new UsedFieldNamesPooledObjectPolicy());
+        }
 
         public override SeqLoggerEvent Read(
                 ref Utf8JsonReader      reader,
@@ -30,52 +36,88 @@ namespace SeqLoggerProvider.Internal.Json
 
             writer.WriteStartObject();
 
-            writer.WriteString("@t", value.Occurred.ToString("o", CultureInfo.InvariantCulture));
+            writer.WriteString("@t", value.OccurredUtc.ToString("o", CultureInfo.InvariantCulture));
             
             writer.WriteString("@l", value.LogLevel.ToString());
 
-            if ((value.EventId.Id is not 0) || !string.IsNullOrWhiteSpace(value.EventId.Name))
-            {
-                writer.WriteNumber("@i", (uint)HashCode.Combine(value.EventId.Id, value.EventId.Name));
-
-                writer.WritePropertyName(propertyNamingPolicy.ConvertName("EventId"));
-                JsonSerializer.Serialize(writer, value.EventId, options);
-            }
-
-            if (!string.IsNullOrWhiteSpace(value.CategoryName))
-                writer.WriteString(propertyNamingPolicy.ConvertName("CategoryName"), value.CategoryName);
+            if (value.EventId.Id is not 0)
+                writer.WriteNumber("@i", (uint)value.EventId.Id);
 
             var message = value.BuildMessage();
             if (!string.IsNullOrWhiteSpace(message))
                 writer.WriteString("@m", message);
 
             if (value.Exception is not null)
+                writer.WriteString("@x", value.Exception.ToString());
+
+            if (!string.IsNullOrWhiteSpace(value.CategoryName))
+                writer.WriteString(propertyNamingPolicy.ConvertName("CategoryName"), value.CategoryName);
+
+            if (!string.IsNullOrWhiteSpace(value.EventId.Name))
+                writer.WriteString("EventName", value.EventId.Name);
+
+            // Write state fields in order of highest-precedence, to lowest, skipping any fields that have already been written.
             {
-                writer.WritePropertyName("@x");
-                JsonSerializer.Serialize(writer, value.Exception, options);
-            }
-
-            var globalFields = _seqLoggerConfiguration.Value.GlobalScopeState;
-            if (globalFields is not null)
-                foreach (var field in globalFields)
-                    writer.WriteString(propertyNamingPolicy.ConvertName(field.Key), field.Value);
-
-            value.WriteState(writer, options);
-
-            foreach(var scopeState in value.ScopeStates)
-            {
-                if ((scopeState is not null) && !writer.TryWriteStateFields(scopeState, options))
+                var usedFieldNames = _usedFieldNamesPool.Get();
+                try
                 {
-                    writer.WritePropertyName(propertyNamingPolicy.ConvertName("ScopeStates"));
-                    writer.WriteStartArray();
-                    JsonSerializer.Serialize(writer, scopeState, options);
-                    writer.WriteEndArray();
+                    var needToWriteState = !value.TryWriteStateAsFieldset(writer, options, usedFieldNames) && !value.IsStateNull;
+
+                    var needToWriteAnyScopeStates = false;
+                    foreach (var scopeState in value.ScopeStatesBuffer)
+                        if (!writer.TryWriteFieldset(scopeState, options, usedFieldNames))
+                            needToWriteAnyScopeStates = true;
+
+                    var globalFields = _seqLoggerConfiguration.Value.GlobalFields;
+                    if (globalFields is not null)
+                        foreach (var field in globalFields)
+                        {
+                            var fieldName = propertyNamingPolicy.ConvertName(field.Key);
+                            if (usedFieldNames.Add(fieldName))
+                                writer.WriteString(fieldName, field.Value);
+                        }
+
+                    // Write any state objects that weren't structured as fieldsets into an arbitrary array.
+                    if (needToWriteState || needToWriteAnyScopeStates)
+                    {
+                        writer.WritePropertyName(propertyNamingPolicy.ConvertName("States"));
+                        writer.WriteStartArray();
+
+                        if (needToWriteState)
+                            value.WriteStateAsValue(writer, options);
+
+                        if (needToWriteAnyScopeStates)
+                            foreach (var scopeState in value.ScopeStatesBuffer)
+                                if (!writer.TryWriteFieldset(scopeState, options, usedFieldNames))
+                                    JsonSerializer.Serialize(writer, scopeState, options);
+
+                        writer.WriteEndArray();
+                    }
+                }
+                finally
+                {
+                    _usedFieldNamesPool.Return(usedFieldNames);
                 }
             }
 
             writer.WriteEndObject();
         }
 
-        private readonly IOptions<SeqLoggerConfiguration> _seqLoggerConfiguration;
+        private readonly IOptions<SeqLoggerConfiguration>   _seqLoggerConfiguration;
+        private readonly ObjectPool<HashSet<string>>        _usedFieldNamesPool;
+
+        private class UsedFieldNamesPooledObjectPolicy
+            : IPooledObjectPolicy<HashSet<string>>
+        {
+            public HashSet<string> Create()
+                => new();
+
+            public bool Return(HashSet<string> obj)
+            {
+                obj.Clear();
+
+                return true;
+            }
+        }
     }
 }

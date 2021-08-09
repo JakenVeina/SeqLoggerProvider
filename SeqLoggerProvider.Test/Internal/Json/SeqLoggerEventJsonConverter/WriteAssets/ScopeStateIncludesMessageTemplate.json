@@ -1,0 +1,8 @@
+{
+  "@t": "1970-01-01T00:00:18.0000000Z",
+  "@l": "Information",
+  "@i": 19,
+  "@m": "This test event contains a scope-state fieldset with a message template field",
+  "CategoryName": "SeqLoggerEventJsonConverter.Write.ScopeStateIncludesMessageTemplate",
+  "EventName": "ScopeStateIncludesMessageTemplateExecuted"
+}

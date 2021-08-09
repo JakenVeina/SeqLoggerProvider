@@ -1,9 +1,15 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SeqLoggerProvider.Utilities
 {
-    internal interface ISystemClock
+    public interface ISystemClock
     {
-        public DateTimeOffset UtcNow { get; }
+        DateTimeOffset Now { get; }
+
+        Task WaitAsync(
+            TimeSpan            duration,
+            CancellationToken   cancellationToken);
     }
 }

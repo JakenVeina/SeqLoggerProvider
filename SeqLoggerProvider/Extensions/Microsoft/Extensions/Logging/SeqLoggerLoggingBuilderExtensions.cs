@@ -17,10 +17,14 @@ namespace Microsoft.Extensions.Logging
             Action<SeqLoggerConfiguration>? configure = null,
             Action<IHttpClientBuilder>?     configureHttpClient = null)
         {
+            builder.AddConfiguration();
+
             builder.Services
                 .AddSingleton<ILoggerProvider, SeqLoggerProvider.Internal.SeqLoggerProvider>()
                 .AddSingleton<ISeqLoggerEventChannel, SeqLoggerEventChannel>()
+                .AddSingleton<ISeqLoggerEventDeliveryManager, SeqLoggerEventDeliveryManager>()
                 .AddSingleton<ISeqLoggerManager, SeqLoggerManager>()
+                .AddSingleton<ISeqLoggerPayloadBuilder, SeqLoggerPayloadBuilder>()
                 .AddSingleton<ISystemClock, DefaultSystemClock>()
                 .ConfigureOptions<JsonSerializerOptionsConfigurator>();
 

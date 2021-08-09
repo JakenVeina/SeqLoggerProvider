@@ -1,11 +1,18 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SeqLoggerProvider.Utilities
 {
-    internal class DefaultSystemClock
+    public class DefaultSystemClock
         : ISystemClock
     {
-        public DateTimeOffset UtcNow
-            => DateTimeOffset.UtcNow;
+        public DateTimeOffset Now
+            => DateTimeOffset.Now;
+
+        public Task WaitAsync(
+                TimeSpan            duration,
+                CancellationToken   cancellationToken)
+            => Task.Delay(duration, cancellationToken);
     }
 }

@@ -27,6 +27,9 @@ namespace SeqLoggerProvider.Internal
         public IDisposable BeginScope<TState>(TState state)
             => _externalScopeProvider.Push(state);
 
+        public string CategoryName
+            => _categoryName;
+
         public bool IsEnabled(LogLevel logLevel)
             => true;
 
@@ -37,31 +40,31 @@ namespace SeqLoggerProvider.Internal
             Exception?                          exception,
             Func<TState, Exception?, string>    formatter)
         {
-            var scopeStates = new List<object>();
+            var scopeStatesBuffer = _seqLoggerEventChannel.GetScopeStatesBuffer();
 
             _externalScopeProvider.ForEachScope(
                 _scopeStateCollector,
-                scopeStates);
+                scopeStatesBuffer);
 
             _seqLoggerEventChannel.WriteEvent(new SeqLoggerEvent<TState>(
-                categoryName:   _categoryName,
-                eventId:        eventId,
-                exception:      exception,
-                formatter:      formatter,
-                logLevel:       logLevel,
-                scopeStates:    scopeStates,
-                state:          state,
-                occurred:      _systemClock.UtcNow));
+                categoryName:       _categoryName,
+                eventId:            eventId,
+                exception:          exception,
+                formatter:          formatter,
+                logLevel:           logLevel,
+                scopeStatesBuffer:  scopeStatesBuffer,
+                state:              state,
+                occurredUtc:        _systemClock.Now.UtcDateTime));
 
             _onLog.Invoke();
         }
 
         private static readonly Action<object?, List<object>> _scopeStateCollector
-        = (scopeState, scopeStates) =>
-        {
-            if (scopeState is not null)
-                scopeStates.Add(scopeState);
-        };
+            = (scopeState, scopeStatesBuffer) =>
+            {
+                if (scopeState is not null)
+                    scopeStatesBuffer.Add(scopeState);
+            };
 
         private readonly string                 _categoryName;
         private readonly IExternalScopeProvider _externalScopeProvider;

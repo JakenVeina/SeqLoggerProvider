@@ -1,0 +1,31 @@
+{
+  "@t": "1970-01-01T00:00:14.0000000Z",
+  "@l": "Debug",
+  "@i": 15,
+  "@m": "This test event contains a variety of state fields, from event state, scoped states, and global fields configuration.",
+  "CategoryName": "SeqLoggerEventJsonConverter.Write.ManyStatesAndGlobalFields",
+  "EventName": "ManyStatesAndGlobalFieldsExecuted",
+  "StateField1": "State Value 1",
+  "StateField2": 15,
+  "StateField3": {
+    "ObjectProperty1": "State Value 2",
+    "ObjectProperty2": "State Value 3"
+  },
+  "ScopeStateField1": "State Value 4",
+  "ScopeStateField2": true,
+  "ScopeStateField3": [
+    "Array Value 1",
+    "Array Value 2",
+    "Array Value 3"
+  ],
+  "GlobalField1": "State Value 8",
+  "GlobalField2": "State Value 9",
+  "GlobalField3": "State Value 10",
+  "States": [
+    {
+      "ScopeStateProperty1": "State Value 5",
+      "ScopeStateProperty2": "State Value 6",
+      "ScopeStateProperty3": "State Value 7"
+    }
+  ]
+}

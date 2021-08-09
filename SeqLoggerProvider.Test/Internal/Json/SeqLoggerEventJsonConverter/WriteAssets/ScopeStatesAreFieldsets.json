@@ -1,0 +1,14 @@
+{
+  "@t": "1970-01-01T00:00:35.0000000Z",
+  "@l": "Trace",
+  "@i": 36,
+  "@m": "This test event contains scope state fieldset objects",
+  "CategoryName": "SeqLoggerEventJsonConverter.Write.ScopeStatesAreFieldsets",
+  "EventName": "ScopeStatesAreFieldsetsExecuted",
+  "ScopeStateField1": "Value 1",
+  "ScopeStateField2": "Value 2",
+  "ScopeStateField3": "Value 3",
+  "ScopeStateField4": "Value 4",
+  "ScopeStateField5": "Value 5",
+  "ScopeStateField6": "Value 6"
+}

@@ -11,13 +11,13 @@
         public const string JsonSerializerOptionsName
             = "SeqLogger";
 
-        internal const int DefaultMaxBatchIntervalSeconds
+        internal const int DefaultMaxDeliveryIntervalSeconds
             = 10;
 
         internal const int DefaultMaxPayloadSize
             = 10 * 1024 * 1024; // 10MB
 
-        internal const int DefaultMinBatchIntervalSeconds
+        internal const int DefaultMinDeliveryIntervalSeconds
             = 1;
 
         internal const string EventIngestionApiPath

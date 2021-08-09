@@ -1,0 +1,10 @@
+{
+  "@t": "1970-01-01T00:00:07.0000000Z",
+  "@l": "Information",
+  "@i": 8,
+  "@m": "This test event contains a state with duplicate fields.",
+  "CategoryName": "SeqLoggerEventJsonConverter.Write.DuplicateFieldsWithinState",
+  "EventName": "DuplicateFieldsWithinStateExecuted",
+  "EventField1": "Field Value 1",
+  "EventField2": "Field Value 2"
+}

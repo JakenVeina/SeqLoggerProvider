@@ -1,0 +1,11 @@
+{
+  "@t": "1970-01-01T00:00:27.0000000Z",
+  "@l": "Debug",
+  "@i": 28,
+  "@m": "This test event contains a scope-state value that is a number",
+  "CategoryName": "SeqLoggerEventJsonConverter.Write.ScopeStateIsNumber",
+  "EventName": "ScopeStateIsNumberExecuted",
+  "States": [
+    29
+  ]
+}

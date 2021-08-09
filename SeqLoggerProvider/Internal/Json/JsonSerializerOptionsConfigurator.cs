@@ -2,8 +2,6 @@
 
 using Microsoft.Extensions.Options;
 
-using SeqLoggerProvider.Json;
-
 namespace SeqLoggerProvider.Internal.Json
 {
     public class JsonSerializerOptionsConfigurator
@@ -15,10 +13,7 @@ namespace SeqLoggerProvider.Internal.Json
         public void Configure(string name, JsonSerializerOptions options)
         {
             if (name is SeqLoggerConstants.JsonSerializerOptionsName)
-            {
                 options.Converters.Add(new SeqLoggerEventJsonConverter(_seqLoggerConfiguration));
-                options.Converters.Add(EventIdJsonConverter.Default);
-            }
         }
 
         void IConfigureOptions<JsonSerializerOptions>.Configure(JsonSerializerOptions options) { }

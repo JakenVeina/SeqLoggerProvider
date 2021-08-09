@@ -5,26 +5,25 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
 using SeqLoggerProvider.Internal.Json;
-using SeqLoggerProvider.Json;
 
 namespace SeqLoggerProvider.Internal
 {
     internal abstract class SeqLoggerEvent
     {
         protected SeqLoggerEvent(
-            string                  categoryName,
-            EventId                 eventId,
-            Exception?              exception,
-            LogLevel                logLevel,
-            DateTimeOffset          occurred,
-            IReadOnlyList<object>   scopeStates)
+            string          categoryName,
+            EventId         eventId,
+            Exception?      exception,
+            LogLevel        logLevel,
+            DateTime        occurredUtc,
+            List<object>    scopeStatesBuffer)
         {
-            CategoryName    = categoryName;
-            EventId         = eventId;
-            Exception       = exception;
-            LogLevel        = logLevel;
-            Occurred        = occurred;
-            ScopeStates     = scopeStates;
+            CategoryName       = categoryName;
+            EventId            = eventId;
+            Exception          = exception;
+            LogLevel           = logLevel;
+            OccurredUtc        = occurredUtc;
+            ScopeStatesBuffer  = scopeStatesBuffer;
         }
 
         public string CategoryName { get; }
@@ -33,20 +32,27 @@ namespace SeqLoggerProvider.Internal
 
         public Exception? Exception { get; }
 
+        public abstract bool IsStateNull { get; }
+
         public LogLevel LogLevel { get; }
 
-        public DateTimeOffset Occurred { get; }
+        public DateTime OccurredUtc { get; }
 
-        public IReadOnlyList<object> ScopeStates { get; }
+        public List<object> ScopeStatesBuffer { get; }
 
         public abstract string BuildMessage();
 
-        public abstract void WriteState(
+        public abstract bool TryWriteStateAsFieldset(
+            Utf8JsonWriter          writer,
+            JsonSerializerOptions   options,
+            HashSet<string>         usedFieldNames);
+
+        public abstract void WriteStateAsValue(
             Utf8JsonWriter          writer,
             JsonSerializerOptions   options);
     }
 
-    internal class SeqLoggerEvent<TState>
+    internal sealed class SeqLoggerEvent<TState>
         : SeqLoggerEvent
     {
         public SeqLoggerEvent(
@@ -55,16 +61,16 @@ namespace SeqLoggerProvider.Internal
                 Exception?                          exception,
                 Func<TState, Exception?, string>    formatter,
                 LogLevel                            logLevel,
-                DateTimeOffset                      occurred,
-                IReadOnlyList<object>               scopeStates,
+                DateTime                            occurredUtc,
+                List<object>                        scopeStatesBuffer,
                 TState                              state)
             : base(
                 categoryName,
                 eventId,
                 exception,
                 logLevel,
-                occurred,
-                scopeStates)
+                occurredUtc,
+                scopeStatesBuffer)
         {
             Formatter   = formatter;
             State       = state;
@@ -72,21 +78,21 @@ namespace SeqLoggerProvider.Internal
 
         public Func<TState, Exception?, string> Formatter { get; }
 
+        public override bool IsStateNull
+            => State is null;
+
         public TState State { get; }
 
         public override string BuildMessage()
             => Formatter.Invoke(State, Exception);
 
-        public override void WriteState(Utf8JsonWriter writer, JsonSerializerOptions options)
-        {
-            if (!writer.TryWriteStateFields(State, options)
-                && (State is not null))
-            {
-                var propertyNamingPolicy = options.PropertyNamingPolicy ?? PassthroughJsonNamingPolicy.Default;
+        public override bool TryWriteStateAsFieldset(
+                Utf8JsonWriter          writer,
+                JsonSerializerOptions   options,
+                HashSet<string>         usedFieldNames)
+            => writer.TryWriteFieldset(State, options, usedFieldNames);
 
-                writer.WritePropertyName(propertyNamingPolicy.ConvertName("State"));
-                JsonSerializer.Serialize(writer, State, options);
-            }
-        }
+        public override void WriteStateAsValue(Utf8JsonWriter writer, JsonSerializerOptions options)
+            => JsonSerializer.Serialize(writer, State, options);
     }
 }

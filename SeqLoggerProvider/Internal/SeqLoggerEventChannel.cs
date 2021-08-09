@@ -1,12 +1,21 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.ObjectPool;
 
 namespace SeqLoggerProvider.Internal
 {
     internal interface ISeqLoggerEventChannel
     {
-        bool TryReadEvent(out SeqLoggerEvent @event);
+        public long EventCount { get; }
+
+        List<object> GetScopeStatesBuffer();
+
+        void ReturnScopeStatesBuffer(List<object> buffer);
+
+        SeqLoggerEvent? TryReadEvent();
 
         Task WaitForAvailableEventsAsync(CancellationToken cancellationToken);
 
@@ -17,23 +26,66 @@ namespace SeqLoggerProvider.Internal
         : ISeqLoggerEventChannel
     {
         public SeqLoggerEventChannel()
-            => _events = Channel.CreateUnbounded<SeqLoggerEvent>(new UnboundedChannelOptions()
+        {
+            _events = Channel.CreateUnbounded<SeqLoggerEvent>(new UnboundedChannelOptions()
             {
-                AllowSynchronousContinuations   = true,
-                SingleReader                    = true,
-                SingleWriter                    = false
+                AllowSynchronousContinuations = false,
+                SingleReader = true,
+                SingleWriter = false
             });
 
-        public bool TryReadEvent(out SeqLoggerEvent @event)
-            => _events.Reader.TryRead(out @event!);
+            _scopeStatesBufferPool = ObjectPool.Create(new ScopeStatesBufferPooledObjectPolicy());
+        }
+
+        public long EventCount
+            => _eventCount;
+
+        public List<object> GetScopeStatesBuffer()
+            => _scopeStatesBufferPool.Get();
+
+        public void ReturnScopeStatesBuffer(List<object> buffer)
+            => _scopeStatesBufferPool.Return(buffer);
+
+        public SeqLoggerEvent? TryReadEvent()
+        {
+            if (_events.Reader.TryRead(out var @event))
+            {
+                Interlocked.Decrement(ref _eventCount);
+                return @event;
+            }
+            else
+                return null;
+        }
 
         public Task WaitForAvailableEventsAsync(CancellationToken cancellationToken)
             => _events.Reader.WaitToReadAsync(cancellationToken)
                 .AsTask();
 
         public void WriteEvent(SeqLoggerEvent @event)
-            => _events.Writer.TryWrite(@event);
+        {
+            // This can never fail, because the channel is unbounded
+            _events.Writer.TryWrite(@event);
 
-        private readonly Channel<SeqLoggerEvent> _events;
+            Interlocked.Increment(ref _eventCount);
+        }
+
+        private readonly Channel<SeqLoggerEvent>    _events;
+        private readonly ObjectPool<List<object>>   _scopeStatesBufferPool;
+
+        private long _eventCount;
+
+        private class ScopeStatesBufferPooledObjectPolicy
+            : IPooledObjectPolicy<List<object>>
+        {
+            public List<object> Create()
+                => new();
+
+            public bool Return(List<object> obj)
+            {
+                obj.Clear();
+
+                return true;
+            }
+        }
     }
 }

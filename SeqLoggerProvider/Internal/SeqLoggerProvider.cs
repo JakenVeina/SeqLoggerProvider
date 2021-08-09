@@ -15,11 +15,11 @@ namespace SeqLoggerProvider.Internal
             IAsyncDisposable
     {
         public SeqLoggerProvider(
-            ISeqLoggerEventChannel  seqLoggerEventManager,
+            ISeqLoggerEventChannel  seqLoggerEventChannel,
             IServiceProvider        serviceProvider,
             ISystemClock            systemClock)
         {
-            _seqLoggerEventChannel  = seqLoggerEventManager;
+            _seqLoggerEventChannel  = seqLoggerEventChannel;
             _serviceProvider        = serviceProvider;
             _systemClock            = systemClock;
 
@@ -42,10 +42,11 @@ namespace SeqLoggerProvider.Internal
         public async ValueTask DisposeAsync()
         {
             _managerStopTokenSource.Cancel();
-            _managerStopTokenSource.Dispose();
 
             if (_whenManagerStopped is not null)
                 await _whenManagerStopped;
+
+            _managerStopTokenSource.Dispose();
         }
 
         void IDisposable.Dispose()
