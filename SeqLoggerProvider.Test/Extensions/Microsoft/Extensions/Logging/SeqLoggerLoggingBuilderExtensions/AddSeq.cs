@@ -66,6 +66,8 @@ namespace SeqLoggerProvider.Test.Extensions.Microsoft.Extensions.Logging.SeqLogg
                 ValidateScopes  = true
             });
 
+            _ = serviceProvider.GetRequiredService<ILoggerFactory>();
+
             mockConfigureHttpClient.Verify(
                 x => x(It.IsNotNull<IHttpClientBuilder>()),
                 Times.Once);

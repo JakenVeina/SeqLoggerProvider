@@ -4,15 +4,16 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Moq;
 using NUnit.Framework;
 using Shouldly;
 
 using SeqLoggerProvider.Internal;
 using SeqLoggerProvider.Utilities;
 
-using Uut = SeqLoggerProvider.Internal.SeqLoggerProvider;
+using Uut = SeqLoggerProvider.SeqLoggerProvider;
 
-namespace SeqLoggerProvider.Test.Internal.SeqLoggerProvider
+namespace SeqLoggerProvider.Test.SeqLoggerProvider
 {
     [TestFixture]
     public class CreateLogger
@@ -21,12 +22,13 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerProvider
         public async Task ExternalScopeProviderHasNotBeenInitialized_ThrowsException()
         {
             using var serviceProvider = new ServiceCollection()
+                .AddSingleton<ISeqLoggerEventChannel>(new FakeSeqLoggerEventChannel())
+                .AddSingleton<ISystemClock>(new FakeSystemClock())
                 .BuildServiceProvider();
 
             var uut = new Uut(
-                seqLoggerEventChannel:  new FakeSeqLoggerEventChannel(),
-                serviceProvider:        serviceProvider,
-                systemClock:            new FakeSystemClock());
+                onDisposedAsync:    Mock.Of<Func<ValueTask>>(),
+                serviceProvider:    serviceProvider);
             
             Should.Throw<InvalidOperationException>(() =>
             {
@@ -44,19 +46,20 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerProvider
             using var seqLoggerManager = new FakeSeqLoggerManager();
 
             using var serviceProvider = new ServiceCollection()
+                .AddSingleton<ISeqLoggerEventChannel>(new FakeSeqLoggerEventChannel())
                 .AddSingleton<ISeqLoggerManager>(seqLoggerManager)
+                .AddSingleton<ISystemClock>(new FakeSystemClock())
                 .BuildServiceProvider();
 
             var uut = new Uut(
-                seqLoggerEventChannel:  new FakeSeqLoggerEventChannel(),
-                serviceProvider:        serviceProvider,
-                systemClock:            new FakeSystemClock());
+                onDisposedAsync:    Mock.Of<Func<ValueTask>>(),
+                serviceProvider:    serviceProvider);
 
             uut.SetScopeProvider(new FakeExternalScopeProvider());
 
             var result = uut.CreateLogger(categoryName);
 
-            var logger = result.ShouldBeOfType<global::SeqLoggerProvider.Internal.SeqLogger>();
+            var logger = result.ShouldBeOfType<SeqLogger>();
 
             logger.CategoryName.ShouldBe(categoryName);
 

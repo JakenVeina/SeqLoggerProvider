@@ -18,7 +18,7 @@ namespace SeqLoggerProvider.Internal
         Task WaitForPayloadDataAsync(CancellationToken cancellationToken);
     }
 
-    internal class SeqLoggerPayloadBuilder
+    internal sealed class SeqLoggerPayloadBuilder
         : ISeqLoggerPayloadBuilder,
             IDisposable
     {

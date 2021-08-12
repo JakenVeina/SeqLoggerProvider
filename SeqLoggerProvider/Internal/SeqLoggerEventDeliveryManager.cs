@@ -52,7 +52,7 @@ namespace SeqLoggerProvider.Internal
 
             var deliveryStarted = _systemClock.Now;
             SeqLoggerLoggerMessages.EventDeliveryStarting(_logger, eventCount, payload.Length);
-            var response = await httpClient.PostAsync(SeqLoggerConstants.EventIngestionApiPath, content);
+            using var response = await httpClient.PostAsync(SeqLoggerConstants.EventIngestionApiPath, content);
             var deliveryDuration = _systemClock.Now - deliveryStarted;
             if (!response.IsSuccessStatusCode)
             {

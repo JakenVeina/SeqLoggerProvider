@@ -64,16 +64,14 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerEventDeliveryManager
                 Now = utcNow
             };
 
-            using var responseContent = new StringContent(responseMessage);
-            using var httpResponseMessage = new HttpResponseMessage(responseStatusCode)
-            {
-                Content = responseContent
-            };
-            using var httpMessageHandler = new FakeHttpMessageHandler(_ =>
+            using var httpMessageHandler = FakeHttpMessageHandler.Create(_ =>
             {
                 systemClock.Now += responseDelay;
-
-                return httpResponseMessage;
+                
+                return new HttpResponseMessage(responseStatusCode)
+                {
+                    Content = new StringContent(responseMessage)
+                };
             });
 
             using var loggerFactory = TestLogger.CreateFactory();

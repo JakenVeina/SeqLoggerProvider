@@ -6,7 +6,7 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadBuilder
     public class Dispose
     {
         [Test]
-        public void Always_Succeeds()
+        public void Always_AllowsMultipleDisposal()
         {
             using var testContext = new TestContext();
 

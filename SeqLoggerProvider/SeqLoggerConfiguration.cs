@@ -8,24 +8,24 @@ namespace SeqLoggerProvider
 {
     public class SeqLoggerConfiguration
     {
-        public string? ApiKey { get; init; }
+        public string? ApiKey { get; set; }
 
-        public IReadOnlyDictionary<string, string>? GlobalFields { get; init; }
+        public IReadOnlyDictionary<string, string>? GlobalFields { get; set; }
 
-        public TimeSpan MaxDeliveryInterval { get; init; }
+        public TimeSpan MaxDeliveryInterval { get; set; }
             = TimeSpan.FromSeconds(SeqLoggerConstants.DefaultMaxDeliveryIntervalSeconds);
 
-        public int MaxPayloadSize { get; init; }
+        public int MaxPayloadSize { get; set; }
             = SeqLoggerConstants.DefaultMaxPayloadSize;
 
-        public TimeSpan MinDeliveryInterval { get; init; }
+        public TimeSpan MinDeliveryInterval { get; set; }
             = TimeSpan.FromSeconds(SeqLoggerConstants.DefaultMinDeliveryIntervalSeconds);
 
-        public LogLevel PriorityDeliveryLevel { get; init; }
+        public LogLevel PriorityDeliveryLevel { get; set; }
             = LogLevel.Error;
 
         [Required]
-        public string ServerUrl { get; init; }
+        public string ServerUrl { get; set; }
             = null!;
     }
 }

@@ -7,10 +7,10 @@ namespace System.Net.Http
     public class FakeHttpMessageHandler
         : HttpMessageHandler
     {
-        public static FakeHttpMessageHandler FromResponse(HttpResponseMessage response)
-            => new(_ => response);
+        public static FakeHttpMessageHandler Create(Func<HttpRequestMessage, HttpResponseMessage> responseFactory)
+            => new(request => Task.FromResult(responseFactory.Invoke(request)));
 
-        public FakeHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> responseFactory)
+        public FakeHttpMessageHandler(Func<HttpRequestMessage, Task<HttpResponseMessage>> responseFactory)
         {
             _responseFactory = responseFactory;
             
@@ -23,10 +23,10 @@ namespace System.Net.Http
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             _receivedRequests.Add(request);
-            return Task.FromResult(_responseFactory.Invoke(request));
+            return _responseFactory.Invoke(request);
         }
 
-        private readonly List<HttpRequestMessage>                       _receivedRequests;
-        private readonly Func<HttpRequestMessage, HttpResponseMessage>  _responseFactory;
+        private readonly List<HttpRequestMessage>                               _receivedRequests;
+        private readonly Func<HttpRequestMessage, Task<HttpResponseMessage>>    _responseFactory;
     }
 }
