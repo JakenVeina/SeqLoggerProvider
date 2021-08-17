@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadBuilder
+namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadManager
 {
     [TestFixture]
     public class Dispose

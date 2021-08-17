@@ -2,12 +2,13 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SeqLoggerProvider.Internal
+namespace BatchingLoggerProvider.Internal
 {
-    internal class FakeSeqLoggerEventChannel
-        : ISeqLoggerEventChannel
+    public class FakeBatchingLoggerEventChannel<TEvent>
+            : IBatchingLoggerEventChannel<TEvent>
+        where TEvent : class, IBatchingLoggerEvent
     {
-        public FakeSeqLoggerEventChannel()
+        public FakeBatchingLoggerEventChannel()
         {
             _events                         = new();
             _returnedScopeStateBuffers      = new();
@@ -17,7 +18,7 @@ namespace SeqLoggerProvider.Internal
         public long EventCount
             => _events.Count;
 
-        public IReadOnlyList<SeqLoggerEvent> Events
+        public IReadOnlyList<TEvent> Events
             => _events;
 
         public List<List<object>> ReturnedScopeStateBuffers
@@ -29,13 +30,16 @@ namespace SeqLoggerProvider.Internal
             set => _tryReadEventInvocationCount = value;
         }
 
+        public void ClearEvents()
+            => _events.Clear();
+
         public List<object> GetScopeStatesBuffer()
             => new();
 
         public void ReturnScopeStatesBuffer(List<object> buffer)
             => _returnedScopeStateBuffers.Add(buffer);
 
-        public SeqLoggerEvent? TryReadEvent()
+        public TEvent? TryReadEvent()
         {
             ++TryReadEventInvocationCount;
 
@@ -56,14 +60,14 @@ namespace SeqLoggerProvider.Internal
                 _waitForAvailableEventsSource.Task,
                 Task.Delay(Timeout.Infinite, cancellationToken));
 
-        public void WriteEvent(SeqLoggerEvent @event)
+        public void WriteEvent(TEvent @event)
         {
             _events.Add(@event);
             _waitForAvailableEventsSource.TrySetResult();
         }
 
-        private readonly List<SeqLoggerEvent>   _events;
-        private readonly List<List<object>>     _returnedScopeStateBuffers;
+        private readonly List<TEvent>       _events;
+        private readonly List<List<object>> _returnedScopeStateBuffers;
 
         private int                     _tryReadEventInvocationCount;
         private TaskCompletionSource    _waitForAvailableEventsSource;

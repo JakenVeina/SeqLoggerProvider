@@ -48,17 +48,17 @@ namespace SeqLoggerProvider.Test
                     .AddFilter<ConsoleLoggerProvider>("SeqLoggerProvider", LogLevel.Trace)
                     .AddFilter<ConsoleLoggerProvider>("SeqLoggerProvider.Test.IntegrationTests", LogLevel.None)
                     .AddSeq(
-                        configure:              configuration =>
+                        configure: builder => builder.Configure(options =>
                         {
-                            configuration.MaxPayloadSize = 10 * 1024;
-                            configuration.ServerUrl = "http://localhost";
-                        },
-                        configureHttpClient:    builder => builder
-                            .ConfigureHttpMessageHandlerBuilder(builder => builder
-                                .PrimaryHandler = httpMessageHandler))
-                    .AddFilter<global::SeqLoggerProvider.SeqLoggerProvider>("", LogLevel.Trace)
-                    .AddFilter<global::SeqLoggerProvider.SeqLoggerProvider>("SeqLoggerProvider", LogLevel.None)
-                    .AddFilter<global::SeqLoggerProvider.SeqLoggerProvider>("SeqLoggerProvider.Test.IntegrationTests", LogLevel.Trace)
+                            options.MaxPayloadSize = 10 * 1024;
+                            options.ServerUrl = "http://localhost";
+                        }),
+                        configureHttpClient: builder => builder
+                         .ConfigureHttpMessageHandlerBuilder(builder => builder
+                             .PrimaryHandler = httpMessageHandler))
+                    .AddFilter<SeqLoggerProvider>("", LogLevel.Trace)
+                    .AddFilter<SeqLoggerProvider>("SeqLoggerProvider", LogLevel.None)
+                    .AddFilter<SeqLoggerProvider>("SeqLoggerProvider.Test.IntegrationTests", LogLevel.Trace)
                     )
                 .BuildServiceProvider(new ServiceProviderOptions()
                 {
@@ -104,7 +104,7 @@ namespace SeqLoggerProvider.Test
                 };
 
                 using var stopTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                while(!stopTokenSource.IsCancellationRequested)
+                while (!stopTokenSource.IsCancellationRequested)
                 {
                     logger.Log(
                         logLevel:   random.Next(1, 100) switch

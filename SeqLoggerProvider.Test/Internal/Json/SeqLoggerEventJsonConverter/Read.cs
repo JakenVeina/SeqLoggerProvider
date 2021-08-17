@@ -18,16 +18,16 @@ namespace SeqLoggerProvider.Test.Internal.Json.SeqLoggerEventJsonConverter
         [Test]
         public void Always_ThrowsException()
         {
-            var seqLoggerConfiguration = FakeOptions.Create(new SeqLoggerConfiguration());
+            var seqLoggerOptions = FakeOptions.Create(new SeqLoggerOptions());
 
-            var uut = new Uut(seqLoggerConfiguration);
+            var uut = new Uut(seqLoggerOptions);
 
             var options = new JsonSerializerOptions();
             options.Converters.Add(uut);
 
             Should.Throw<NotSupportedException>(() =>
             {
-                _ = JsonSerializer.Deserialize<SeqLoggerEvent>("{}", options);
+                _ = JsonSerializer.Deserialize<ISeqLoggerEvent>("{}", options);
             });
         }
     }

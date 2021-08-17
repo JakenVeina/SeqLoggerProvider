@@ -4,56 +4,30 @@ using System.Text.Json;
 
 using Microsoft.Extensions.Logging;
 
+using BatchingLoggerProvider.Internal;
+
 using SeqLoggerProvider.Internal.Json;
 
 namespace SeqLoggerProvider.Internal
 {
-    internal abstract class SeqLoggerEvent
+    public interface ISeqLoggerEvent
+        : IBatchingLoggerEvent
     {
-        protected SeqLoggerEvent(
-            string          categoryName,
-            EventId         eventId,
-            Exception?      exception,
-            LogLevel        logLevel,
-            DateTime        occurredUtc,
-            List<object>    scopeStatesBuffer)
-        {
-            CategoryName       = categoryName;
-            EventId            = eventId;
-            Exception          = exception;
-            LogLevel           = logLevel;
-            OccurredUtc        = occurredUtc;
-            ScopeStatesBuffer  = scopeStatesBuffer;
-        }
+        bool IsStateNull { get; }
 
-        public string CategoryName { get; }
-
-        public EventId EventId { get; }
-
-        public Exception? Exception { get; }
-
-        public abstract bool IsStateNull { get; }
-
-        public LogLevel LogLevel { get; }
-
-        public DateTime OccurredUtc { get; }
-
-        public List<object> ScopeStatesBuffer { get; }
-
-        public abstract string BuildMessage();
-
-        public abstract bool TryWriteStateAsFieldset(
+        bool TryWriteStateAsFieldset(
             Utf8JsonWriter          writer,
             JsonSerializerOptions   options,
             HashSet<string>         usedFieldNames);
 
-        public abstract void WriteStateAsValue(
+        void WriteStateAsValue(
             Utf8JsonWriter          writer,
             JsonSerializerOptions   options);
     }
 
     internal sealed class SeqLoggerEvent<TState>
-        : SeqLoggerEvent
+        : BatchingLoggerEvent<TState>,
+            ISeqLoggerEvent
     {
         public SeqLoggerEvent(
                 string                              categoryName,
@@ -68,31 +42,23 @@ namespace SeqLoggerProvider.Internal
                 categoryName,
                 eventId,
                 exception,
+                formatter,
                 logLevel,
                 occurredUtc,
-                scopeStatesBuffer)
-        {
-            Formatter   = formatter;
-            State       = state;
-        }
+                scopeStatesBuffer,
+                state)
+        { }
 
-        public Func<TState, Exception?, string> Formatter { get; }
-
-        public override bool IsStateNull
+        public bool IsStateNull
             => State is null;
 
-        public TState State { get; }
-
-        public override string BuildMessage()
-            => Formatter.Invoke(State, Exception);
-
-        public override bool TryWriteStateAsFieldset(
+        public bool TryWriteStateAsFieldset(
                 Utf8JsonWriter          writer,
                 JsonSerializerOptions   options,
                 HashSet<string>         usedFieldNames)
             => writer.TryWriteFieldset(State, options, usedFieldNames);
 
-        public override void WriteStateAsValue(Utf8JsonWriter writer, JsonSerializerOptions options)
+        public void WriteStateAsValue(Utf8JsonWriter writer, JsonSerializerOptions options)
             => JsonSerializer.Serialize(writer, State, options);
     }
 }

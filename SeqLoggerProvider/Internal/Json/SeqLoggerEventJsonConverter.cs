@@ -12,16 +12,16 @@ using SeqLoggerProvider.Json;
 namespace SeqLoggerProvider.Internal.Json
 {
     internal class SeqLoggerEventJsonConverter
-        : JsonConverter<SeqLoggerEvent>
+        : JsonConverter<ISeqLoggerEvent>
     {
-        public SeqLoggerEventJsonConverter(IOptions<SeqLoggerConfiguration> seqLoggerConfiguration)
+        public SeqLoggerEventJsonConverter(IOptions<SeqLoggerOptions> options)
         {
-            _seqLoggerConfiguration = seqLoggerConfiguration;
+            _options = options;
 
             _usedFieldNamesPool = ObjectPool.Create(new UsedFieldNamesPooledObjectPolicy());
         }
 
-        public override SeqLoggerEvent Read(
+        public override ISeqLoggerEvent Read(
                 ref Utf8JsonReader      reader,
                 Type                    typeToConvert,
                 JsonSerializerOptions   options)
@@ -29,7 +29,7 @@ namespace SeqLoggerProvider.Internal.Json
 
         public override void Write(
             Utf8JsonWriter          writer,
-            SeqLoggerEvent          value,
+            ISeqLoggerEvent         value,
             JsonSerializerOptions   options)
         {
             var propertyNamingPolicy = options.PropertyNamingPolicy ?? PassthroughJsonNamingPolicy.Default;
@@ -68,7 +68,7 @@ namespace SeqLoggerProvider.Internal.Json
                         if (!writer.TryWriteFieldset(scopeState, options, usedFieldNames))
                             needToWriteAnyScopeStates = true;
 
-                    var globalFields = _seqLoggerConfiguration.Value.GlobalFields;
+                    var globalFields = _options.Value.GlobalFields;
                     if (globalFields is not null)
                         foreach (var field in globalFields)
                         {
@@ -103,8 +103,8 @@ namespace SeqLoggerProvider.Internal.Json
             writer.WriteEndObject();
         }
 
-        private readonly IOptions<SeqLoggerConfiguration>   _seqLoggerConfiguration;
-        private readonly ObjectPool<HashSet<string>>        _usedFieldNamesPool;
+        private readonly IOptions<SeqLoggerOptions>     _options;
+        private readonly ObjectPool<HashSet<string>>    _usedFieldNamesPool;
 
         private class UsedFieldNamesPooledObjectPolicy
             : IPooledObjectPolicy<HashSet<string>>

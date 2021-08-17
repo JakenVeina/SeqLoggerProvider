@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
+using System.Net;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -12,15 +12,15 @@ using Shouldly;
 
 using SeqLoggerProvider.Internal;
 
-namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadBuilder
+namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadManager
 {
     [TestFixture]
-    public class AppendPayloadData
+    public class TryAppendAvailableDataToPayload
     {
         public static IReadOnlyList<TestCaseData> ChannelHasEvents_TestCaseData()
             => new[]
             {
-                /*                  priorityDeliveryLevel,  isReadyToDeliver,   logEventLevels                                                                                                      */
+                /*                  priorityDeliveryLevel,  isDeliveryNeeded,   logEventLevels                                                                                                      */
                 new TestCaseData(   LogLevel.Trace,         true,               new[] { LogLevel.Trace }                                                                                            ).SetName("{m}(Trace log, Priority)"),
                 new TestCaseData(   LogLevel.Debug,         false,              new[] { LogLevel.Trace }                                                                                            ).SetName("{m}(Trace log, Non-Priority)"),
                 new TestCaseData(   LogLevel.Debug,         true,               new[] { LogLevel.Debug }                                                                                            ).SetName("{m}(Debug log, Priority)"),
@@ -43,12 +43,12 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadBuilder
         [TestCaseSource(nameof(ChannelHasEvents_TestCaseData))]
         public void ChannelHasEvents_AddsEventsToPayload(
             LogLevel                priorityDeliveryLevel,
-            bool                    isReadyToDeliver,
+            bool                    isDeliveryNeeded,
             IReadOnlyList<LogLevel> eventLogLevels)
         {
             using var testContext = new TestContext();
 
-            testContext.Configuration.Value = new()
+            testContext.Options.Value = new()
             {
                 PriorityDeliveryLevel = priorityDeliveryLevel
             };
@@ -60,8 +60,8 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadBuilder
                     message:    $"This is test event #{i}"));;
 
             var eventsSerialized = new List<string>();
-            testContext.JsonSerializerOptions.Values.First().Converters.Clear();
-            testContext.JsonSerializerOptions.Values.First().Converters.Add(new FakeJsonConverter<SeqLoggerEvent>(
+            testContext.JsonSerializerOptions.Value.Converters.Clear();
+            testContext.JsonSerializerOptions.Value.Converters.Add(new FakeJsonConverter<ISeqLoggerEvent>(
             (writer, value, options) =>
             {
                 var serializedEvent = value.BuildMessage();
@@ -69,30 +69,29 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadBuilder
                 eventsSerialized.Add(serializedEvent);
             }));
 
-            var uut = testContext.BuildUut();
+            using var uut = testContext.BuildUut();
 
-            using var payloadBuffer = new MemoryStream();
-            var payloadEncoding = new UTF8Encoding(false);
-
-            var result = uut.AppendPayloadData(payloadBuffer);
+            uut.TryAppendAvailableDataToPayload();
 
             eventsSerialized.Count.ShouldBe(eventLogLevels.Count);
 
-            payloadEncoding.GetString(payloadBuffer.GetBuffer(), 0, (int)payloadBuffer.Length).ShouldBe(string.Join("", eventsSerialized.Select(x => $"\"{x}\"\n")));
-            payloadBuffer.Position.ShouldBe(payloadBuffer.Length);
-
-            result.EventsAdded.ShouldBe((uint)eventLogLevels.Count);
-            result.IsDeliveryNeeded.ShouldBe(isReadyToDeliver);
+            uut.IsPayloadEmpty.ShouldBeFalse();
+            uut.IsDeliveryNeeded.ShouldBe(isDeliveryNeeded);
+            uut.PayloadEventCount.ShouldBe((uint)eventLogLevels.Count);
         }
 
         [Test]
-        public void PayloadOverflows_CachesEventUntilPayloadHasRoom()
+        public async Task PayloadOverflows_CachesEventUntilPayloadHasRoom()
         {
-            using var testContext = new TestContext();
-
-            testContext.Configuration.Value = new()
+            using var testContext = new TestContext()
             {
-                MaxPayloadSize = 25
+                HttpResponseStatusCode = HttpStatusCode.OK
+            };
+
+            testContext.Options.Value = new()
+            {
+                MaxPayloadSize  = 25,
+                ServerUrl       = "http://localhost"
             };
 
             testContext.EventChannel.WriteEvent(TestSeqLoggerEvent.Create(
@@ -105,8 +104,8 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadBuilder
                 message:    "This is test event #2"));;
 
             var eventsSerialized = new List<string>();
-            testContext.JsonSerializerOptions.Values.First().Converters.Clear();
-            testContext.JsonSerializerOptions.Values.First().Converters.Add(new FakeJsonConverter<SeqLoggerEvent>(
+            testContext.JsonSerializerOptions.Value.Converters.Clear();
+            testContext.JsonSerializerOptions.Value.Converters.Add(new FakeJsonConverter<ISeqLoggerEvent>(
             (writer, value, options) =>
             {
                 var serializedEvent = value.BuildMessage();
@@ -114,61 +113,50 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadBuilder
                 eventsSerialized.Add(serializedEvent);
             }));
 
-            var uut = testContext.BuildUut();
-
-            using var payloadBuffer = new MemoryStream();
-            var payloadEncoding = new UTF8Encoding(false);
+            using var uut = testContext.BuildUut();
 
             // Trigger a payload overflow, and verify that the overflowed event does not get written.
             {
-                var result = uut.AppendPayloadData(payloadBuffer);
+                uut.TryAppendAvailableDataToPayload();
 
                 eventsSerialized.Count.ShouldBe(2);
 
-                payloadEncoding.GetString(payloadBuffer.GetBuffer(), 0, (int)payloadBuffer.Length).ShouldBe($"\"{eventsSerialized[0]}\"\n");
-                payloadBuffer.Position.ShouldBe(payloadBuffer.Length);
-
-                result.EventsAdded.ShouldBe(1U);
-                result.IsDeliveryNeeded.ShouldBeTrue();
+                uut.IsPayloadEmpty.ShouldBeFalse();
+                uut.IsDeliveryNeeded.ShouldBeTrue();
+                uut.PayloadEventCount.ShouldBe(1U);
             }
 
             // Verify that the previously overflowed event does not get written, if there's still no room in the buffer.
             {
-                var result = uut.AppendPayloadData(payloadBuffer);
+                uut.TryAppendAvailableDataToPayload();
 
-                payloadEncoding.GetString(payloadBuffer.GetBuffer(), 0, (int)payloadBuffer.Length).ShouldBe($"\"{eventsSerialized[0]}\"\n");
-                payloadBuffer.Position.ShouldBe(payloadBuffer.Length);
-
-                testContext.EventChannel.TryReadEventInvocationCount.ShouldBe(2);
-
-                result.EventsAdded.ShouldBe(0U);
-                result.IsDeliveryNeeded.ShouldBeTrue();
+                uut.IsPayloadEmpty.ShouldBeFalse();
+                uut.IsDeliveryNeeded.ShouldBeTrue();
+                uut.PayloadEventCount.ShouldBe(1U);
             }
 
-            payloadBuffer.SetLength(0);
+            // Clear the payload buffer
+            await uut.TryDeliverPayloadAsync();
 
             // Verify that the previously overflowed event gets written, now that there's room in the buffer.
             {
-                var result = uut.AppendPayloadData(payloadBuffer);
+                uut.TryAppendAvailableDataToPayload();
 
-                payloadEncoding.GetString(payloadBuffer.GetBuffer(), 0, (int)payloadBuffer.Length).ShouldBe($"\"{eventsSerialized[1]}\"\n");
-                payloadBuffer.Position.ShouldBe(payloadBuffer.Length);
-
-                result.EventsAdded.ShouldBe(1U);
-                result.IsDeliveryNeeded.ShouldBeFalse();
+                uut.IsPayloadEmpty.ShouldBeFalse();
+                uut.IsDeliveryNeeded.ShouldBeFalse();
+                uut.PayloadEventCount.ShouldBe(1U);
             }
 
-            payloadBuffer.SetLength(0);
-            
+            // Clear the payload buffer, again
+            await uut.TryDeliverPayloadAsync();
+
             // Verify that the overflowed event is no longer cached.
             {
-                var result = uut.AppendPayloadData(payloadBuffer);
+                uut.TryAppendAvailableDataToPayload();
 
-                payloadBuffer.Length.ShouldBe(0);
-                payloadBuffer.Position.ShouldBe(0);
-
-                result.EventsAdded.ShouldBe(0U);
-                result.IsDeliveryNeeded.ShouldBeFalse();
+                uut.IsPayloadEmpty.ShouldBeTrue();
+                uut.IsDeliveryNeeded.ShouldBeFalse();
+                uut.PayloadEventCount.ShouldBe(0U);
             }
         }
 
@@ -184,8 +172,8 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadBuilder
                     message:    $"This is test event #{i}"));
 
             var eventsSerialized = new List<string>();
-            testContext.JsonSerializerOptions.Values.First().Converters.Clear();
-            testContext.JsonSerializerOptions.Values.First().Converters.Add(new FakeJsonConverter<SeqLoggerEvent>(
+            testContext.JsonSerializerOptions.Value.Converters.Clear();
+            testContext.JsonSerializerOptions.Value.Converters.Add(new FakeJsonConverter<ISeqLoggerEvent>(
             (writer, value, options) =>
             {
                 var serializedEvent = value.BuildMessage();
@@ -195,19 +183,14 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadBuilder
                 eventsSerialized.Add(serializedEvent);
             }));
 
-            var uut = testContext.BuildUut();
-
-            using var payloadBuffer = new MemoryStream();
+            using var uut = testContext.BuildUut();
 
             // Verify that all events that serialized correctly were written to the payload.
-            var result = uut.AppendPayloadData(payloadBuffer);
+            uut.TryAppendAvailableDataToPayload();
 
-            var payloadEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-            payloadEncoding.GetString(payloadBuffer.GetBuffer(), 0, (int)payloadBuffer.Length).ShouldBe(string.Join("", eventsSerialized.Select(x => $"\"{x}\"\n")));
-            payloadBuffer.Position.ShouldBe(payloadBuffer.Length);
-
-            result.EventsAdded.ShouldBe(9U);
-            result.IsDeliveryNeeded.ShouldBeFalse();
+            uut.IsPayloadEmpty.ShouldBeFalse();
+            uut.IsDeliveryNeeded.ShouldBeFalse();
+            uut.PayloadEventCount.ShouldBe(9U);
         }
 
         [Test]
@@ -215,7 +198,7 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadBuilder
         {
             using var testContext = new TestContext();
 
-            testContext.Configuration.Value = new()
+            testContext.Options.Value = new()
             {
                 MaxPayloadSize = 10
             };
@@ -225,17 +208,13 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerPayloadBuilder
                 state:      1,
                 message:    "This is test event #1"));;
 
-            var uut = testContext.BuildUut();
+            using var uut = testContext.BuildUut();
 
-            using var payloadBuffer = new MemoryStream();
+            uut.TryAppendAvailableDataToPayload();
 
-            var result = uut.AppendPayloadData(payloadBuffer);
-
-            payloadBuffer.Length.ShouldBe(0);
-            payloadBuffer.Position.ShouldBe(0);
-
-            result.EventsAdded.ShouldBe(0U);
-            result.IsDeliveryNeeded.ShouldBeFalse();
+            uut.IsPayloadEmpty.ShouldBeTrue();
+            uut.IsDeliveryNeeded.ShouldBeFalse();
+            uut.PayloadEventCount.ShouldBe(0U);
         }
     }
 }

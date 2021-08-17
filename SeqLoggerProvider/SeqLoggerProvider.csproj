@@ -4,19 +4,16 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
-  </ItemGroup>
-
   <ItemGroup>
+    <PackageReference Include="BatchingLoggerProvider" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="5.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="5.0.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
-    <PackageReference Include="System.Threading.Channels" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

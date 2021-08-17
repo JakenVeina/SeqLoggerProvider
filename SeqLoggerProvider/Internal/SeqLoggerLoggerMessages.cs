@@ -12,7 +12,7 @@ namespace SeqLoggerProvider.Internal
         public static void EventSerializationFailed(
                 ILogger         logger,
                 Exception       exception,
-                SeqLoggerEvent  failedEvent)
+                ISeqLoggerEvent failedEvent)
             => logger.Log(
                 logLevel:   LogLevel.Warning,
                 eventId:    new(0x1F48B658, nameof(EventSerializationFailed)),
@@ -25,7 +25,7 @@ namespace SeqLoggerProvider.Internal
             public static readonly Func<EventSerializationFailedLoggerMessageState, Exception?, string> Formatter
                 = (state, _) => state.ToString();
 
-            public EventSerializationFailedLoggerMessageState(SeqLoggerEvent failedEvent)
+            public EventSerializationFailedLoggerMessageState(ISeqLoggerEvent failedEvent)
                 => _failedEvent = failedEvent;
 
             public KeyValuePair<string, object?> this[int index]
@@ -83,15 +83,15 @@ namespace SeqLoggerProvider.Internal
             IEnumerator IEnumerable.GetEnumerator()
                 => GetEnumerator();
 
-            private readonly SeqLoggerEvent _failedEvent;
+            private readonly ISeqLoggerEvent _failedEvent;
         }
-
 
         public static void EventDeliveryFailed(
                 ILogger         logger,
-                string          response,
+                string?         response,
                 string          serverUrl,
-                HttpStatusCode  statusCode,
+                HttpStatusCode? statusCode,
+                Exception?      exception,
                 TimeSpan        deliveryDuration)
             => logger.Log(
                 logLevel:   LogLevel.Error,
@@ -111,9 +111,9 @@ namespace SeqLoggerProvider.Internal
 
             public EventDeliveryFailedLoggerMessageState(
                 TimeSpan        deliveryDuration,
-                string          response,
+                string?         response,
                 string          serverUrl,
-                HttpStatusCode  statusCode)
+                HttpStatusCode? statusCode)
             {
                 _deliveryDuration   = deliveryDuration;
                 _response           = response;
@@ -136,13 +136,13 @@ namespace SeqLoggerProvider.Internal
             public TimeSpan DeliveryDuration
                 => _deliveryDuration;
 
-            public string Response
+            public string? Response
                 => _response;
 
             public string ServerUrl
                 => _serverUrl;
 
-            public HttpStatusCode StatusCode
+            public HttpStatusCode? StatusCode
                 => _statusCode;
 
             public IEnumerator<KeyValuePair<string, object?>> GetEnumerator()
@@ -158,10 +158,10 @@ namespace SeqLoggerProvider.Internal
             IEnumerator IEnumerable.GetEnumerator()
                 => GetEnumerator();
 
-            private readonly TimeSpan       _deliveryDuration;
-            private readonly string         _response;
-            private readonly string         _serverUrl;
-            private readonly HttpStatusCode _statusCode;
+            private readonly TimeSpan           _deliveryDuration;
+            private readonly string?            _response;
+            private readonly string             _serverUrl;
+            private readonly HttpStatusCode?    _statusCode;
         }
 
         public static void EventDeliveryFinished(
@@ -198,7 +198,7 @@ namespace SeqLoggerProvider.Internal
 
         public static void EventTooLarge(
                 ILogger         logger,
-                SeqLoggerEvent  failedEvent,
+                ISeqLoggerEvent failedEvent,
                 long            eventSize,
                 long            maxPayloadSize)
             => logger.Log(
@@ -215,7 +215,7 @@ namespace SeqLoggerProvider.Internal
 
             public EventTooLargeLoggerMessageState(
                 long            eventSize,
-                SeqLoggerEvent  failedEvent,
+                ISeqLoggerEvent failedEvent,
                 long            maxPayloadSize)
             {
                 _eventSize      = eventSize;
@@ -288,38 +288,9 @@ namespace SeqLoggerProvider.Internal
             IEnumerator IEnumerable.GetEnumerator()
                 => GetEnumerator();
 
-            private readonly long           _eventSize;
-            private readonly SeqLoggerEvent _failedEvent;
-            private readonly long           _maxPayloadSize;
+            private readonly long               _eventSize;
+            private readonly ISeqLoggerEvent    _failedEvent;
+            private readonly long               _maxPayloadSize;
         }
-
-
-        public static void ManagerCrashed(
-                ILogger     logger,
-                Exception   exception)
-            => _managerCrashed.Invoke(
-                logger,
-                exception);
-        private static readonly Action<ILogger, Exception?> _managerCrashed
-            = LoggerMessage.Define(
-                logLevel:       LogLevel.Critical,
-                eventId:        new(0x1B322285, nameof(ManagerCrashed)),
-                formatString:   "The Seq logger manager has crashed, due to an unrecoverable error, and can no longer sedelivernd events to the server.");
-
-        public static void ManagerStarted(ILogger logger)
-            => _managerStarted.Invoke(logger, null);
-        private static readonly Action<ILogger, Exception?> _managerStarted
-            = LoggerMessage.Define(
-                logLevel:       LogLevel.Information,
-                eventId:        new(0x2E48908A, nameof(ManagerStarted)),
-                formatString:   "The Seq logger manager has started delivering events to the server.");
-
-        public static void ManagerStopped(ILogger logger)
-            => _managerStopped.Invoke(logger, null);
-        private static readonly Action<ILogger, Exception?> _managerStopped
-            = LoggerMessage.Define(
-                logLevel:       LogLevel.Information,
-                eventId:        new(0x12EB92DA, nameof(ManagerStopped)),
-                formatString:   "The Seq logger manager has stopped delivering events to the server.");
     }
 }

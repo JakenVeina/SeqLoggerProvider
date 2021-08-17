@@ -1,28 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 using Microsoft.Extensions.Logging;
 
+using BatchingLoggerProvider;
+
 namespace SeqLoggerProvider
 {
-    public class SeqLoggerConfiguration
+    public class SeqLoggerOptions
+        : BatchingLoggerOptions
     {
         public string? ApiKey { get; set; }
 
         public IReadOnlyDictionary<string, string>? GlobalFields { get; set; }
 
-        public TimeSpan MaxDeliveryInterval { get; set; }
-            = TimeSpan.FromSeconds(SeqLoggerConstants.DefaultMaxDeliveryIntervalSeconds);
-
         public int MaxPayloadSize { get; set; }
             = SeqLoggerConstants.DefaultMaxPayloadSize;
 
-        public TimeSpan MinDeliveryInterval { get; set; }
-            = TimeSpan.FromSeconds(SeqLoggerConstants.DefaultMinDeliveryIntervalSeconds);
-
         public LogLevel PriorityDeliveryLevel { get; set; }
-            = LogLevel.Error;
+            = SeqLoggerConstants.DefaultPriorityDeliveryLevel;
 
         [Required]
         public string ServerUrl { get; set; }

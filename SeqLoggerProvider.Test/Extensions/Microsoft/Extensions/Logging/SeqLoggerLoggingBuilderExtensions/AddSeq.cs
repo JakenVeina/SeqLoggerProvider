@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -32,7 +33,7 @@ namespace SeqLoggerProvider.Test.Extensions.Microsoft.Extensions.Logging.SeqLogg
         {
             var services = new ServiceCollection();
 
-            var mockConfigure = new Mock<Action<SeqLoggerConfiguration>>();
+            var mockConfigure = new Mock<Action<OptionsBuilder<SeqLoggerOptions>>>();
 
             services.AddLogging(builder => builder
                 .AddSeq(configure: mockConfigure.Object));
@@ -43,10 +44,31 @@ namespace SeqLoggerProvider.Test.Extensions.Microsoft.Extensions.Logging.SeqLogg
                 ValidateScopes  = true
             });
 
-            _ = serviceProvider.GetRequiredService<IOptions<SeqLoggerConfiguration>>().Value;
-
             mockConfigure.Verify(
-                x => x(It.IsNotNull<SeqLoggerConfiguration>()),
+                x => x(It.IsNotNull<OptionsBuilder<SeqLoggerOptions>>()),
+                Times.Once);
+        }
+
+        [Test]
+        public void ConfigureJsonSerializerIsGiven_ConfigureJsonSerializerIsInvoked()
+        {
+            var services = new ServiceCollection();
+
+            var mockConfigureJsonSerializer = new Mock<Action<OptionsBuilder<JsonSerializerOptions>>>();
+
+            services.AddLogging(builder => builder
+                .AddSeq(configureJsonSerializer: mockConfigureJsonSerializer.Object));
+
+            using var serviceProvider = services.BuildServiceProvider(new ServiceProviderOptions()
+            {
+                ValidateOnBuild = true,
+                ValidateScopes  = true
+            });
+
+            _ = serviceProvider.GetRequiredService<ILoggerFactory>();
+
+            mockConfigureJsonSerializer.Verify(
+                x => x(It.IsNotNull<OptionsBuilder<JsonSerializerOptions>>()),
                 Times.Once);
         }
 

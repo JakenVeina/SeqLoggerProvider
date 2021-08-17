@@ -7,7 +7,7 @@ namespace SeqLoggerProvider.Internal
 {
     internal static class TestSeqLoggerEvent
     {
-        public static SeqLoggerEvent Create<TState>(
+        public static ISeqLoggerEvent Create<TState>(
                                     TState                  state,
                                     LogLevel                logLevel            = LogLevel.Information,
                                     int                     eventId             = default,

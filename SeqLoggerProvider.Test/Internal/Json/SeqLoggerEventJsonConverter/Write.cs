@@ -433,16 +433,16 @@ namespace SeqLoggerProvider.Test.Internal.Json.SeqLoggerEventJsonConverter
 
         [TestCaseSource(nameof(Always_TestCaseData))]
         public async Task Always_ResultIsCorrect(
-            SeqLoggerEvent                          value,
+            ISeqLoggerEvent                         value,
             string                                  expectedDocumentAssetPath,
             IReadOnlyDictionary<string, string>?    globalFields)
         {
-            var seqLoggerConfiguration = FakeOptions.Create(new SeqLoggerConfiguration()
+            var seqLoggerOptions = FakeOptions.Create(new SeqLoggerOptions()
             {
                 GlobalFields = globalFields
             });
 
-            var uut = new Uut(seqLoggerConfiguration);
+            var uut = new Uut(seqLoggerOptions);
 
             var options = new JsonSerializerOptions()
             {
