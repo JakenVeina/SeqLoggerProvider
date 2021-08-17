@@ -8,7 +8,7 @@ An implementation of `ILoggerProvider`, from the [.NET Extensions Logging Framew
 
 This library provides an alternative to the [official Seq logger provider](https://datalust.co/seq), with a goal of providing a slimmer and more extensible implementation. This library includes the following key features that separate it from the official one:
 
- - Includes only first-party .NET dependencies, including...
+ - Includes only first-party and .NET dependencies, including...
  -- [System.Text.Json](https://docs.microsoft.com/en-us/dotnet/api/system.text.json?view=net-5.0),
  -- [System.Threading.Channels](https://docs.microsoft.com/en-us/dotnet/api/system.threading.channels?view=net-5.0),
  -- [Microsoft.Extensions.Http](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-5.0),
@@ -62,11 +62,11 @@ Configuration is automatically extracted from the ambient `IConfiguration` syste
 If you would like to customize the configuration manually, the `.AddSeq()` method supports a standard configuration delegate being passed in...
 
 ```cs
-builder.AddSeq(configuration =>
+builder.AddSeq(options =>
 {
 	var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
 	if (assemblyVersion is not null)
-        configuration.GlobalScopeState.Add("Version", assemblyVersion.ToString();
+        options.GlobalScopeState.Add("Version", assemblyVersion.ToString();
 });
 ```
 
@@ -74,10 +74,10 @@ All configuration properties are optional, except for `ServerUrl`, for obvious r
 
 ### JSON Customization
 
-In order to customize JSON serialization behavior, simply access and configure the instance of `JsonSerializationOptions` that the provider registers with the options system.
+In order to customize JSON serialization behavior, simply supply an options configuration delegate, when adding the provider.
 
 ```cs
-services.Configure<JsonSerializerOptions>(SeqLoggerConstants.JsonSerializerOptionsName, options
+builder.AddSeq(configureJsonSerializer: options =>
 {
     options.Converters.Add(new MyJsonConverter());
     options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
