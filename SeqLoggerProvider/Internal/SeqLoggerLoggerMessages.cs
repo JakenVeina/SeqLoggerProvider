@@ -31,30 +31,30 @@ namespace SeqLoggerProvider.Internal
             public KeyValuePair<string, object?> this[int index]
                 => index switch
                 {
-                    0   => new(nameof(CategoryName),    CategoryName),
-                    1   => new(nameof(EventId),         EventId),
-                    2   => new(nameof(EventName),       EventName),
-                    3   => new(nameof(LogLevel),        LogLevel),
-                    4   => new(nameof(OccurredUtc),     OccurredUtc),
+                    0   => new(nameof(FailedEventCategoryName), FailedEventCategoryName),
+                    1   => new(nameof(FailedEventId),           FailedEventId),
+                    2   => new(nameof(FailedEventName),         FailedEventName),
+                    3   => new(nameof(FailedEventLogLevel),     FailedEventLogLevel.ToString()),
+                    4   => new(nameof(FailedEventOccurredUtc),  FailedEventOccurredUtc),
                     _   => throw new KeyNotFoundException()
                 };
 
             public int Count
                 => 5;
 
-            public string CategoryName
+            public string FailedEventCategoryName
                 => _failedEvent.CategoryName;
 
-            public int EventId
+            public int FailedEventId
                 => _failedEvent.EventId.Id;
 
-            public string EventName
+            public string FailedEventName
                 => _failedEvent.EventId.Name;
 
-            public LogLevel LogLevel
+            public LogLevel FailedEventLogLevel
                 => _failedEvent.LogLevel;
 
-            public DateTimeOffset OccurredUtc
+            public DateTimeOffset FailedEventOccurredUtc
                 => _failedEvent.OccurredUtc;
 
             public IEnumerator<KeyValuePair<string, object?>> GetEnumerator()
@@ -73,10 +73,10 @@ namespace SeqLoggerProvider.Internal
 
                 return (idIsSpecified, nameIsSpecified) switch
                 {
-                    (false, false)  => $"An error occurred during serialization of data of a log event ({_failedEvent.CategoryName}).",
-                    (false, true)   => $"An error occurred during serialization of data of a log event ({_failedEvent.CategoryName}:{_failedEvent.EventId.Name}).",
-                    (true, false)   => $"An error occurred during serialization of data of a log event ({_failedEvent.CategoryName}:{_failedEvent.EventId.Id}).",
-                    _               => $"An error occurred during serialization of data of a log event ({_failedEvent.CategoryName}:{_failedEvent.EventId.Id}:{_failedEvent.EventId.Name})."
+                    (false, false)  => $"An error occurred during serialization of a log event ({_failedEvent.CategoryName}).",
+                    (false, true)   => $"An error occurred during serialization of a log event ({_failedEvent.CategoryName}:{_failedEvent.EventId.Name}).",
+                    (true, false)   => $"An error occurred during serialization of a log event ({_failedEvent.CategoryName}:{_failedEvent.EventId.Id}).",
+                    _               => $"An error occurred during serialization of a log event ({_failedEvent.CategoryName}:{_failedEvent.EventId.Id}:{_failedEvent.EventId.Name})."
                 };
             }
 
@@ -226,38 +226,38 @@ namespace SeqLoggerProvider.Internal
             public KeyValuePair<string, object?> this[int index]
                 => index switch
                 {
-                    0 => new(nameof(CategoryName),      CategoryName),
-                    1 => new(nameof(EventId),           EventId),
-                    2 => new(nameof(EventName),         EventName),
-                    3 => new(nameof(EventSize),         EventSize),
-                    4 => new(nameof(LogLevel),          LogLevel),
-                    5 => new(nameof(MaxPayloadSize),    MaxPayloadSize),
-                    6 => new(nameof(OccurredUtc),       OccurredUtc),
+                    0 => new(nameof(FailedEventCategoryName),   FailedEventCategoryName),
+                    1 => new(nameof(FailedEventId),             FailedEventId),
+                    2 => new(nameof(EvaileEventName),           EvaileEventName),
+                    3 => new(nameof(FailedEventSize),           FailedEventSize),
+                    4 => new(nameof(FailedEventLogLevel),       FailedEventLogLevel.ToString()),
+                    5 => new(nameof(MaxPayloadSize),            MaxPayloadSize),
+                    6 => new(nameof(FailedEventOccurredUtc),    FailedEventOccurredUtc),
                     _ => throw new KeyNotFoundException()
                 };
 
             public int Count
                 => 7;
 
-            public string CategoryName
+            public string FailedEventCategoryName
                 => _failedEvent.CategoryName;
 
-            public int EventId
+            public int FailedEventId
                 => _failedEvent.EventId.Id;
 
-            public string EventName
+            public string EvaileEventName
                 => _failedEvent.EventId.Name;
 
-            public long EventSize
+            public long FailedEventSize
                 => _eventSize;
 
-            public LogLevel LogLevel
+            public LogLevel FailedEventLogLevel
                 => _failedEvent.LogLevel;
 
             public long MaxPayloadSize
                 => _maxPayloadSize;
 
-            public DateTimeOffset OccurredUtc
+            public DateTimeOffset FailedEventOccurredUtc
                 => _failedEvent.OccurredUtc;
 
             public IEnumerator<KeyValuePair<string, object?>> GetEnumerator()
