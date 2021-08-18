@@ -509,7 +509,16 @@ namespace SeqLoggerProvider.Test.Internal.Json.SeqLoggerEventJsonConverter
             {
                 var expectedProperty = expectedPropertiesByName[resultProperty.Name];
 
-                CompareJsonElements(resultProperty.Value, expectedProperty.Value);
+                if (resultProperty.Name is "@x")
+                {
+                    resultProperty.Value.ValueKind.ShouldBe(JsonValueKind.String);
+
+                    var expectedMessage = expectedProperty.Value.GetString()!;
+
+                    resultProperty.Value.GetString().ShouldStartWith(expectedMessage.Substring(0, expectedMessage.IndexOf('\r')));
+                }
+                else
+                    CompareJsonElements(resultProperty.Value, expectedProperty.Value);
             }
         }
     }
