@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable CS1591 // Not a public API
+
+using System;
 using System.Collections.Generic;
 
 using Microsoft.Extensions.Logging;
@@ -11,7 +13,7 @@ namespace SeqLoggerProvider.Internal
     public class SeqLogger
         : BatchingLoggerBase<ISeqLoggerEvent>
     {
-        public SeqLogger(
+        internal SeqLogger(
                 string                                          categoryName,
                 IBatchingLoggerEventChannel<ISeqLoggerEvent>    eventChannel,
                 IExternalScopeProvider                          externalScopeProvider,

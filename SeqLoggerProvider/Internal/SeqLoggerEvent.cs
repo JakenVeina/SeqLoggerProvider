@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable CS1591 // Not a public API
+
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 

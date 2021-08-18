@@ -11,6 +11,9 @@ using SeqLoggerProvider.Internal;
 
 namespace SeqLoggerProvider
 {
+    /// <summary>
+    /// An implementation of <see cref="ILoggerProvider"/> for a logger that delivers log event data to a remote Seq server, in batches.
+    /// </summary>
     [ProviderAlias(SeqLoggerConstants.ProviderName)]
     public sealed class SeqLoggerProvider
         : BatchingLoggerProviderBase<SeqLogger, ISeqLoggerEvent>
@@ -23,6 +26,7 @@ namespace SeqLoggerProvider
                 serviceProvider)
         { }
 
+        /// <inheritdoc/>
         protected override SeqLogger CreateLogger(
                 string                                          categoryName,
                 IBatchingLoggerEventChannel<ISeqLoggerEvent>    eventChannel,

@@ -7,6 +7,10 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="BatchingLoggerProvider" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
