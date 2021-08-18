@@ -15,6 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeqLoggerProvider.Test", "SeqLoggerProvider.Test\SeqLoggerProvider.Test.csproj", "{42ECDA75-56C3-40DF-987F-B14A0CA131C8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{C09528A1-2A05-4579-805A-2FAE2924FEB0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{8ED740B8-2816-48A7-896B-1973D3F88354}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\continuous-deployment.yml = .github\workflows\continuous-deployment.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +39,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8ED740B8-2816-48A7-896B-1973D3F88354} = {C09528A1-2A05-4579-805A-2FAE2924FEB0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D8FAF155-5F97-49F6-968D-3F324247151A}
