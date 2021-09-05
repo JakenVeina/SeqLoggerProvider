@@ -125,6 +125,7 @@ namespace SeqLoggerProvider.Internal
                 EventId     failedEntryEventId,
                 LogLevel    failedEntryLogLevel,
                 DateTime    failedEntryOccurredUtc,
+                Type        failedEntryStateType,
                 Exception   exception)
             => logger.Log(
                 logLevel:   LogLevel.Warning,
@@ -133,7 +134,8 @@ namespace SeqLoggerProvider.Internal
                     failedEntryCategoryName,
                     failedEntryEventId,
                     failedEntryLogLevel,
-                    failedEntryOccurredUtc),
+                    failedEntryOccurredUtc,
+                    failedEntryStateType.ToString()),
                 exception:  exception,
                 formatter:  EntrySerializationFailedLoggerMessageState.Formatter);
         private struct EntrySerializationFailedLoggerMessageState
@@ -143,76 +145,83 @@ namespace SeqLoggerProvider.Internal
                 = (state, _) => state.ToString();
 
             public EntrySerializationFailedLoggerMessageState(
-                string      failedEntryCategoryName,
-                EventId     failedEntryId,
-                LogLevel    failedEntryLogLevel,
-                DateTime    failedEntryOccurredUtc)
-            {
-                _failedEntryCategoryName    = failedEntryCategoryName;
-                _failedEntryId              = failedEntryId;
-                _failedEntryLogLevel        = failedEntryLogLevel;
-                _failedEntryOccurredUtc     = failedEntryOccurredUtc;
-            }
+                    string      failedEntryCategoryName,
+                    EventId     failedEntryEventId,
+                    LogLevel    failedEntryLogLevel,
+                    DateTime    failedEntryOccurredUtc,
+                    string      failedEntryStateType)
+                => _failedEntry = new(
+                    categoryName:   failedEntryCategoryName,
+                    eventId:        failedEntryEventId,
+                    logLevel:       failedEntryLogLevel,
+                    occurredUtc:    failedEntryOccurredUtc,
+                    stateType:      failedEntryStateType);
 
             public KeyValuePair<string, object?> this[int index]
                 => index switch
                 {
-                    0   => new(nameof(FailedEntryCategoryName), FailedEntryCategoryName),
-                    1   => new(nameof(FailedEntryEventId),      FailedEntryEventId),
-                    2   => new(nameof(FailedEntryEventName),    FailedEntryEventName),
-                    3   => new(nameof(FailedEntryLogLevel),     FailedEntryLogLevel.ToString()),
-                    4   => new(nameof(FailedEntryOccurredUtc),  FailedEntryOccurredUtc),
+                    0   => new(nameof(FailedEntry), FailedEntry),
                     _   => throw new KeyNotFoundException()
                 };
 
             public int Count
-                => 5;
+                => 1;
 
-            public string FailedEntryCategoryName
-                => _failedEntryCategoryName;
-
-            public int FailedEntryEventId
-                => _failedEntryId.Id;
-
-            public string FailedEntryEventName
-                => _failedEntryId.Name;
-
-            public LogLevel FailedEntryLogLevel
-                => _failedEntryLogLevel;
-
-            public DateTimeOffset FailedEntryOccurredUtc
-                => _failedEntryOccurredUtc;
+            public FailedEntryInfo FailedEntry
+                => _failedEntry;
 
             public IEnumerator<KeyValuePair<string, object?>> GetEnumerator()
             {
                 yield return this[0];
-                yield return this[1];
-                yield return this[2];
-                yield return this[3];
-                yield return this[4];
             }
 
             public override string ToString()
             {
-                var idIsSpecified = _failedEntryId.Id is not 0;
-                var nameIsSpecified = !string.IsNullOrWhiteSpace(_failedEntryId.Name);
-
-                return (idIsSpecified, nameIsSpecified) switch
+                var idIsSpecified = _failedEntry.EventId is not 0;
+                var nameIsSpecified = !string.IsNullOrWhiteSpace(_failedEntry.EventName);
+                                return (idIsSpecified, nameIsSpecified) switch
                 {
-                    (false, false)  => $"An error occurred during serialization of a log entry ({_failedEntryCategoryName}).",
-                    (false, true)   => $"An error occurred during serialization of a log entry ({_failedEntryCategoryName}:{_failedEntryId.Name}).",
-                    (true, false)   => $"An error occurred during serialization of a log entry ({_failedEntryCategoryName}:{_failedEntryId.Id}).",
-                    _               => $"An error occurred during serialization of a log entry ({_failedEntryCategoryName}:{_failedEntryId.Id}:{_failedEntryId.Name})."
+                    (false, false)  => $"An error occurred during serialization of a log entry ({_failedEntry.CategoryName}).",
+                    (false, true)   => $"An error occurred during serialization of a log entry ({_failedEntry.CategoryName}:{_failedEntry.EventName}).",
+                    (true, false)   => $"An error occurred during serialization of a log entry ({_failedEntry.CategoryName}:{_failedEntry.EventId}).",
+                    _               => $"An error occurred during serialization of a log entry ({_failedEntry.CategoryName}:{_failedEntry.EventId}:{_failedEntry.EventName})."
                 };
             }
 
             IEnumerator IEnumerable.GetEnumerator()
                 => GetEnumerator();
 
-            private readonly string     _failedEntryCategoryName;
-            private readonly EventId    _failedEntryId;
-            private readonly LogLevel   _failedEntryLogLevel;
-            private readonly DateTime   _failedEntryOccurredUtc;
+            private readonly FailedEntryInfo _failedEntry;
+
+            public struct FailedEntryInfo
+            {
+                public FailedEntryInfo(
+                    string      categoryName,
+                    EventId     eventId,
+                    LogLevel    logLevel,
+                    DateTime    occurredUtc,
+                    string      stateType)
+                {
+                    CategoryName    = categoryName;
+                    EventId         = eventId.Id;
+                    EventName       = eventId.Name;
+                    LogLevel        = logLevel;
+                    OccurredUtc     = occurredUtc;
+                    StateType       = stateType;  
+                }
+
+                public string CategoryName { get; }
+                
+                public int EventId { get; }
+                
+                public string EventName { get; }
+
+                public LogLevel LogLevel { get; }
+                
+                public DateTime OccurredUtc { get; }
+
+                public string StateType { get; }
+            }
         }
 
         public static void EntryTooLarge(

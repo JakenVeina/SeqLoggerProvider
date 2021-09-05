@@ -72,7 +72,7 @@ namespace SeqLoggerProvider.Internal
             }
             catch (Exception ex)
             {
-                SeqLoggerLoggerMessages.EntrySerializationFailed(_logger, _categoryName, eventId, logLevel, occurredUtc, ex);
+                SeqLoggerLoggerMessages.EntrySerializationFailed(_logger, _categoryName, eventId, logLevel, occurredUtc, typeof(TState), ex);
 
                 _eventPool.Return(@event);
                 return;
