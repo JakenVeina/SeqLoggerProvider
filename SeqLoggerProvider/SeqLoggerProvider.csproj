@@ -11,20 +11,30 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>SeqLoggerProvider</PackageId>
-    <PackageVersion>1.0.1.0</PackageVersion>
+    <PackageVersion>2.0.0.0</PackageVersion>
     <Authors>Jake Meiergerd</Authors>
     <PackageProjectUrl>https://github.com/JakenVeina/SeqLoggerProvider</PackageProjectUrl>
     <RepositoryUrl>https://github.com/JakenVeina/SeqLoggerProvider</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>An implementation of ILoggerProvider, from the .NET Extensions Logging Framework framework, for writing log events to a Seq server.</Description>
-    <PackageReleaseNotes>Fixed some issues with internal logging messages.</PackageReleaseNotes>
+    <PackageReleaseNotes>Removed BatchingLoggerProvider dependency, in favor of a direct implementation.
+
+Serialization now happens in the foreground, per https://github.com/dotnet/runtime/issues/57803.
+
+Multiple levels of object pooling have been added, to reduce memory footprint.
+
+Organization has been adjusted to reduce the public API footprint.
+
+Self-logging has been re-structured to be more straightforward, in how it eliminates issues of recursion and post-initialization.
+
+Naming has been adjusted a bit: "Event" was being misused in a confusing manner to refer to individual log records, while Microsoft uses it to refer to a "type" of event. "Entry" is now used to describe individual records.</PackageReleaseNotes>
     <PackageTags>logging, seq, microsoft, extensions, ILogger</PackageTags>
     <NoPackageAnalysis>false</NoPackageAnalysis>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <IncludeBuildOutput>true</IncludeBuildOutput>
-    <Version>1.0.1</Version>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
