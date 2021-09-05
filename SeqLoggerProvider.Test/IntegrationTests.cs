@@ -107,7 +107,7 @@ namespace SeqLoggerProvider.Test
                 while (!stopTokenSource.IsCancellationRequested)
                 {
                     logger.Log(
-                        logLevel:   random.Next(1, 100) switch
+                        logLevel:   random.Next(1, 101) switch
                         {
                             int x when x <= 1   => LogLevel.Critical,
                             int x when x <= 2   => LogLevel.Error,
@@ -116,16 +116,18 @@ namespace SeqLoggerProvider.Test
                             int x when x <= 50  => LogLevel.Debug,
                             _                   => LogLevel.Trace,
                         },
-                        eventId:    eventIds[random.Next(0, eventIds.Length - 1)],
-                        state:      Enumerable.Range(1, random.Next(0, 5))
-                            .Select(x => new KeyValuePair<string, object?>($"StateField{x}", random.Next(1, 3) switch
+                        eventId:    eventIds[random.Next(0, eventIds.Length)],
+                        state:      Enumerable.Range(1, random.Next(0, 6))
+                            .Select(x => new KeyValuePair<string, object?>($"StateField{x}", random.Next(1, 6) switch
                             {
                                 1 => random.Next(),
                                 2 => random.Next().ToString(),
-                                _ => DateTimeOffset.FromUnixTimeMilliseconds(random.Next())
+                                3 => DateTimeOffset.FromUnixTimeMilliseconds(random.Next()),
+                                4 => typeof(IntegrationTests),
+                                _ => typeof(IntegrationTests).GetMethods()[0]
                             }))
                             .ToArray(),
-                        exception:  random.Next(1, 100) switch
+                        exception:  random.Next(1, 101) switch
                         {
                             int x when x < 5    => TestException.Create(),
                             _                   => null
@@ -135,7 +137,7 @@ namespace SeqLoggerProvider.Test
 
                     try
                     {
-                        await Task.Delay(TimeSpan.FromMilliseconds(random.Next(0, 100)));
+                        await Task.Delay(TimeSpan.FromMilliseconds(random.Next(0, 101)));
                     }
                     catch (OperationCanceledException) { }
                 }

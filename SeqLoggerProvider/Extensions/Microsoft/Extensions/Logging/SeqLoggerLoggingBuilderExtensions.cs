@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Channels;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -71,7 +73,12 @@ namespace Microsoft.Extensions.Logging
                         systemClock:            serviceProvider.GetRequiredService<ISystemClock>()));
 
                 var jsonSerializerOptionsBuilder = internalServices
-                    .AddOptions<JsonSerializerOptions>();
+                    .AddOptions<JsonSerializerOptions>()
+                    .Configure(options =>
+                    {
+                        options.Converters.Add(new MemberInfoWriteOnlyJsonConverterFactory()); // System.Text.Json doesn't support serializing Type and other System.Reflection objects.
+                        options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+                    });
                 if (configureJsonSerializer is not null)
                     configureJsonSerializer.Invoke(jsonSerializerOptionsBuilder);
 

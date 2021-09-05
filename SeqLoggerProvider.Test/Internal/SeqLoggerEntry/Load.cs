@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -583,7 +584,8 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerEntry
                 state:          state,
                 options:        new JsonSerializerOptions()
                 {
-                    WriteIndented = true
+                    Encoder         = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                    WriteIndented   = true
                 });
 
             uut.CategoryName    .ShouldBe(categoryName);
@@ -620,6 +622,7 @@ namespace SeqLoggerProvider.Test.Internal.SeqLoggerEntry
 
             var options = new JsonSerializerOptions()
             {
+                Encoder                 = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                 WriteIndented           = true,
                 PropertyNamingPolicy    = JsonNamingPolicy.CamelCase
             };
