@@ -1,4 +1,4 @@
-# StructuredLoggerMessage
+# SeqLoggerProvider
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Continuous Deployment](https://github.com/JakenVeina/SeqLoggerProvider/workflows/Continuous%20Deployment/badge.svg)](https://github.com/JakenVeina/SeqLoggerProvider/actions?query=workflow%3A%22Continuous+Deployment%22)
