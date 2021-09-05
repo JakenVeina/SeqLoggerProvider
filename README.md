@@ -4,7 +4,7 @@
 [![Continuous Deployment](https://github.com/JakenVeina/SeqLoggerProvider/workflows/Continuous%20Deployment/badge.svg)](https://github.com/JakenVeina/SeqLoggerProvider/actions?query=workflow%3A%22Continuous+Deployment%22)
 [![NuGet](https://img.shields.io/nuget/v/SeqLoggerProvider.svg)](https://www.nuget.org/packages/SeqLoggerProvider/)
 
-An implementation of `ILoggerProvider`, from the [.NET Extensions Logging Framework](https://docs.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line) framework, for writing log events to a [Seq](https://datalust.co/seq) server.
+An implementation of `ILoggerProvider`, from the [.NET Extensions Logging Framework](https://docs.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line) framework, for writing log entries to a [Seq](https://datalust.co/seq) server.
 
 This library provides an alternative to the [official Seq logger provider](https://datalust.co/seq), with a goal of providing a slimmer and more extensible implementation. This library includes the following key features that separate it from the official one:
 
@@ -16,8 +16,8 @@ This library provides an alternative to the [official Seq logger provider](https
  -- [Microsoft.Extensions.DependencyInjection](https://docs.microsoft.com/en-us/dotnet/core/extensions/dependency-injection)
  - Allows for global-scope log data, I.E. data fields that are included upon every log event sent to the server.
  - Allows for more granular control of event batching, including both size-based and time-based thresholds, and flood control
- - Provides extension points for JSON serialization, based on [System.Text.Json](https://docs.microsoft.com/en-us/dotnet/api/system.text.json?view=net-5.0), allowing for consumers to write custom serializers for log events that can optimize for performance or data size.
- - Provides extension points for HTTP transmission, allowing for consumers to apply any custom configurations to the `HttpClient` instances that are used to deliver log events to the Seq server.
+ - Provides extension points for JSON serialization, based on [System.Text.Json](https://docs.microsoft.com/en-us/dotnet/api/system.text.json?view=net-5.0), allowing for consumers to write custom serializers for log entries that can optimize for performance or data size.
+ - Provides extension points for HTTP transmission, allowing for consumers to apply any custom configurations to the `HttpClient` instances that are used to deliver log entries to the Seq server.
 
 ## Usage
 
