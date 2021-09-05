@@ -1,0 +1,12 @@
+{
+  "@t": "1970-01-01T00:00:00.0000000Z",
+  "@l": "Debug",
+  "@i": 1,
+  "@m": "This is a test message",
+  "categoryName": "Category",
+  "eventName": "Event",
+  "states": [
+    "This is a custom state object",
+    "This is a custom scope state object"
+  ]
+}

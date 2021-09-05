@@ -1,0 +1,13 @@
+{
+  "@t": "1970-01-01T00:00:02.0000000Z",
+  "@l": "Debug",
+  "@i": 2,
+  "@m": "This test event contains a variety of duplicate fields.",
+  "CategoryName": "Category1",
+  "EventName": "Event2",
+  "EventField1": "Field Value 1",
+  "EventField2": "Field Value 2",
+  "EventField3": "Field Value 3",
+  "EventField4": "Field Value 6",
+  "EventField5": "Field Value 9"
+}

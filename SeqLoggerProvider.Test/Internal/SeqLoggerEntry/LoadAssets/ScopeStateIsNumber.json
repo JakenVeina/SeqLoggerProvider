@@ -1,0 +1,11 @@
+{
+  "@t": "1970-01-01T00:00:15.0000000Z",
+  "@l": "Information",
+  "@i": 14,
+  "@m": "This test event contains a scope-state value that is a number.",
+  "CategoryName": "Category14",
+  "EventName": "Event14",
+  "States": [
+    16
+  ]
+}

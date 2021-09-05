@@ -1,7 +1,0 @@
-{
-  "@t": "1970-01-01T00:00:01.0000000Z",
-  "@l": "Critical",
-  "@i": 2,
-  "@m": "This test event contains no category name.",
-  "EventName": "CategoryNameIsOmittedExecuted"
-}

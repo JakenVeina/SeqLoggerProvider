@@ -1,0 +1,11 @@
+{
+  "@t": "1970-01-01T00:00:24.0000000Z",
+  "@l": "Critical",
+  "@i": 23,
+  "@m": "This test event contains a state value that is a number.",
+  "CategoryName": "Category23",
+  "EventName": "Event23",
+  "States": [
+    25
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "@t": "1970-01-01T00:00:11.0000000Z",
+  "@l": "Error",
+  "@i": 10,
+  "@m": "This test event contains a scope-state object that is an array.",
+  "CategoryName": "Category10",
+  "EventName": "Event10",
+  "States": [
+    [
+      "Array Value 1",
+      "Array Value 2",
+      "Array Value 3"
+    ]
+  ]
+}

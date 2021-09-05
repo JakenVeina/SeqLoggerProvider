@@ -14,6 +14,24 @@ namespace SeqLoggerProvider
             = "X-Seq-ApiKey";
 
         /// <summary>
+        /// The default value used for <see cref="SeqLoggerOptions.MaxDeliveryInterval"/>.
+        /// </summary>
+        public const int DefaultMaxDeliveryIntervalSeconds
+            = 10;
+
+        /// <summary>
+        /// The default value used for <see cref="SeqLoggerOptions.MaxPayloadSize"/>.
+        /// </summary>
+        public const uint DefaultMaxPayloadSize
+            = 10 * 1024 * 1024; // 10MB
+
+        /// <summary>
+        /// The default value used for <see cref="SeqLoggerOptions.MinDeliveryInterval"/>.
+        /// </summary>
+        public const int DefaultMinDeliveryIntervalSeconds
+            = 1;
+
+        /// <summary>
         /// The default value used for <see cref="SeqLoggerOptions.PriorityDeliveryLevel"/>.
         /// </summary>
         public const LogLevel DefaultPriorityDeliveryLevel
@@ -24,9 +42,6 @@ namespace SeqLoggerProvider
         /// </summary>
         public const string ProviderName
             = "Seq";
-
-        internal const int DefaultMaxPayloadSize
-            = 10 * 1024 * 1024; // 10MB
 
         internal const string EventIngestionApiPath
             = "api/events/raw";

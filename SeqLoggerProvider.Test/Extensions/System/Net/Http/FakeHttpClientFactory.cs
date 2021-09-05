@@ -26,7 +26,7 @@ namespace System.Net.Http
                 _messageHandlers.Add(name, messageHandler);
             }
 
-            return new HttpClient(messageHandler);
+            return new HttpClient(messageHandler, disposeHandler: false);
         }
 
         private readonly Dictionary<string, HttpMessageHandler> _messageHandlers;

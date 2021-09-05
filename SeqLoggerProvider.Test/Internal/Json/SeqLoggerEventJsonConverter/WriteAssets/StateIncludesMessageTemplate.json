@@ -1,8 +1,0 @@
-{
-  "@t": "1970-01-01T00:00:39.0000000Z",
-  "@l": "Critical",
-  "@i": 40,
-  "@m": "This test event contains a state fieldset with a message template field",
-  "CategoryName": "SeqLoggerEventJsonConverter.Write.StateIncludesMessageTemplate",
-  "EventName": "StateIncludesMessageTemplateExecuted"
-}

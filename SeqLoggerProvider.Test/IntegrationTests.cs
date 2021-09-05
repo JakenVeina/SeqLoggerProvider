@@ -19,20 +19,20 @@ namespace SeqLoggerProvider.Test
     [TestFixture]
     public class IntegrationTests
     {
-        private static ServiceProvider CreateServiceProvider(Action onEventDelivered)
+        private static ServiceProvider CreateServiceProvider(Action onEntryDelivered)
         {
             var httpMessageHandler = new FakeHttpMessageHandler(async request =>
             {
                 var content = request.Content.ShouldNotBeNull();
 
                 var payload = await content.ReadAsStringAsync();
-                foreach (var encodedEvent in payload.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                foreach (var encodedEntry in payload.Split('\n', StringSplitOptions.RemoveEmptyEntries))
                 {
-                    onEventDelivered.Invoke();
+                    onEntryDelivered.Invoke();
 
-                    Console.WriteLine(encodedEvent);
+                    Console.WriteLine(encodedEntry);
 
-                    using var document = JsonDocument.Parse(encodedEvent);
+                    using var document = JsonDocument.Parse(encodedEntry);
 
                     document.RootElement.ValueKind.ShouldBe(JsonValueKind.Object);
                 }
@@ -56,9 +56,9 @@ namespace SeqLoggerProvider.Test
                         configureHttpClient: builder => builder
                          .ConfigureHttpMessageHandlerBuilder(builder => builder
                              .PrimaryHandler = httpMessageHandler))
-                    .AddFilter<SeqLoggerProvider>("", LogLevel.Trace)
-                    .AddFilter<SeqLoggerProvider>("SeqLoggerProvider", LogLevel.None)
-                    .AddFilter<SeqLoggerProvider>("SeqLoggerProvider.Test.IntegrationTests", LogLevel.Trace)
+                    .AddFilter<global::SeqLoggerProvider.SeqLoggerProvider>("", LogLevel.Trace)
+                    .AddFilter<global::SeqLoggerProvider.SeqLoggerProvider>("SeqLoggerProvider", LogLevel.None)
+                    .AddFilter<global::SeqLoggerProvider.SeqLoggerProvider>("SeqLoggerProvider.Test.IntegrationTests", LogLevel.Trace)
                     )
                 .BuildServiceProvider(new ServiceProviderOptions()
                 {
@@ -70,25 +70,25 @@ namespace SeqLoggerProvider.Test
         [Test]
         public async Task AllLogsAreSuccessfullyDeliveredOverBriefTime()
         {
-            var deliveredEventCount = 0;
+            var deliveredEntryCount = 0;
 
-            await using (var serviceProvider = CreateServiceProvider(() => ++deliveredEventCount))
+            await using (var serviceProvider = CreateServiceProvider(() => ++deliveredEntryCount))
             {
                 var logger = serviceProvider.GetRequiredService<ILogger<IntegrationTests>>();
 
                 logger.Log(LogLevel.Debug, "This is a test");
             }
 
-            deliveredEventCount.ShouldBe(1);
+            deliveredEntryCount.ShouldBe(1);
         }
 
         [Test]
         public async Task AllLogsAreSuccessfullyDeliveredOverLongTime()
         {
-            var eventCount = 0;
-            var deliveredEventCount = 0;
+            var generatedEntryCount = 0;
+            var deliveredEntryCount = 0;
 
-            await using (var serviceProvider = CreateServiceProvider(() => ++deliveredEventCount))
+            await using (var serviceProvider = CreateServiceProvider(() => ++deliveredEntryCount))
             {
                 var logger = serviceProvider.GetRequiredService<ILogger<IntegrationTests>>();
 
@@ -131,7 +131,7 @@ namespace SeqLoggerProvider.Test
                             _                   => null
                         },
                         formatter:  (_, _) => "This is a test.");
-                    ++eventCount;
+                    ++generatedEntryCount;
 
                     try
                     {
@@ -141,7 +141,7 @@ namespace SeqLoggerProvider.Test
                 }
             }
 
-            deliveredEventCount.ShouldBe(eventCount);
+            deliveredEntryCount.ShouldBe(generatedEntryCount);
         }
     }
 }

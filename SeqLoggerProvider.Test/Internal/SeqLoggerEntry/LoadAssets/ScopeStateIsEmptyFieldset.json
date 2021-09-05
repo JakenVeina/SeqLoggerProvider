@@ -1,0 +1,8 @@
+{
+  "@t": "1970-01-01T00:00:12.0000000Z",
+  "@l": "Critical",
+  "@i": 11,
+  "@m": "This test event contains a scope-state fieldset with no fields.",
+  "CategoryName": "Category11",
+  "EventName": "Event11"
+}

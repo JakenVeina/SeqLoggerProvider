@@ -1,0 +1,9 @@
+{
+  "@t": "1970-01-01T00:00:07.0000000Z",
+  "@l": "Trace",
+  "@i": 6,
+  "@m": "This test event contains an exception.",
+  "@x": "System.TestException: This is a test exception.\r\n   at...",
+  "CategoryName": "Category6",
+  "EventName": "Event6"
+}

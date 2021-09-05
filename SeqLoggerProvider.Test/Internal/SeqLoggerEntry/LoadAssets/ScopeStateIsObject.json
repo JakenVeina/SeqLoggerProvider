@@ -1,0 +1,15 @@
+{
+  "@t": "1970-01-01T00:00:16.0000000Z",
+  "@l": "Warning",
+  "@i": 15,
+  "@m": "This test event contains a scope-state object with properties.",
+  "CategoryName": "Category15",
+  "EventName": "Event15",
+  "States": [
+    {
+      "ObjectProperty1": "Object Value 1",
+      "ObjectProperty2": 17,
+      "ObjectProperty3": false
+    }
+  ]
+}
