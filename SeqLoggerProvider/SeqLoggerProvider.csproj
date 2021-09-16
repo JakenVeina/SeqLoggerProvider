@@ -26,6 +26,9 @@
     <NoPackageAnalysis>false</NoPackageAnalysis>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <IncludeBuildOutput>true</IncludeBuildOutput>
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>false</DelaySign>
+    <AssemblyOriginatorKeyFile>SeqLoggerProvider.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
