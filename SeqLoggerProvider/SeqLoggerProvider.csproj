@@ -11,17 +11,13 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>SeqLoggerProvider</PackageId>
-    <Version>2.1.0</Version>
+    <Version>2.1.1</Version>
     <Authors>Jake Meiergerd</Authors>
     <PackageProjectUrl>https://github.com/JakenVeina/SeqLoggerProvider</PackageProjectUrl>
     <RepositoryUrl>https://github.com/JakenVeina/SeqLoggerProvider</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>An implementation of ILoggerProvider, from the .NET Extensions Logging Framework framework, for writing log events to a Seq server.</Description>
-    <PackageReleaseNotes>
-      Adjusted structure of and added some more debugging info to the EntrySerializationFailed logger message.
-
-      Added support for serialization of all `System.Reflection.MemberInfo` objects, in the form of simply serializing the member and type name.
-    </PackageReleaseNotes>
+    <PackageReleaseNotes>Added assembly strong-naming</PackageReleaseNotes>
     <PackageTags>logging, seq, microsoft, extensions, ILogger</PackageTags>
     <NoPackageAnalysis>false</NoPackageAnalysis>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
