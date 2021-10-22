@@ -11,13 +11,16 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>SeqLoggerProvider</PackageId>
-    <Version>2.1.1</Version>
+    <Version>2.1.2</Version>
     <Authors>Jake Meiergerd</Authors>
     <PackageProjectUrl>https://github.com/JakenVeina/SeqLoggerProvider</PackageProjectUrl>
     <RepositoryUrl>https://github.com/JakenVeina/SeqLoggerProvider</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>An implementation of ILoggerProvider, from the .NET Extensions Logging Framework framework, for writing log events to a Seq server.</Description>
-    <PackageReleaseNotes>Added assembly strong-naming</PackageReleaseNotes>
+    <PackageReleaseNotes>
+      Implemented serialization of large numeric values to string, instead of JSON number, as a workaround for https://github.com/datalust/seq-tickets/issues/216
+      Updated to latest PATCH version, for all dependencies.
+    </PackageReleaseNotes>
     <PackageTags>logging, seq, microsoft, extensions, ILogger</PackageTags>
     <NoPackageAnalysis>false</NoPackageAnalysis>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
