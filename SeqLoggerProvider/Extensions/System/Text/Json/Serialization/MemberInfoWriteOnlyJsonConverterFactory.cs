@@ -2,7 +2,7 @@
 
 namespace System.Text.Json.Serialization
 {
-    internal class MemberInfoWriteOnlyJsonConverterFactory
+    internal sealed class MemberInfoWriteOnlyJsonConverterFactory
         : JsonConverterFactory
     {
         public override bool CanConvert(Type typeToConvert)

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text.Json;
 
+using Moq;
 using NUnit.Framework;
 using Shouldly;
 
-namespace SeqLoggerProvider.Test.Extensions.System.Text.Json.Serialization.MemberInfoWriteOnlyJsonConverter
+namespace SeqLoggerProvider.Test.Extensions.System.Text.Json.Serialization.WriteOnlyJsonConverter
 {
     [TestFixture]
     public class Read
@@ -14,13 +15,9 @@ namespace SeqLoggerProvider.Test.Extensions.System.Text.Json.Serialization.Membe
         public static readonly IReadOnlyList<TestCaseData> Always_TestCaseData
             = new[]
             {
-                new TestCaseData(typeof(MemberInfo)         ).SetName("{m}(MemberInfo)"),
-                new TestCaseData(typeof(Type)               ).SetName("{m}(Type)"),
-                new TestCaseData(typeof(TypeInfo)           ).SetName("{m}(TypeInfo)"),
-                new TestCaseData(typeof(FieldInfo)          ).SetName("{m}(FieldInfo)"),
-                new TestCaseData(typeof(ConstructorInfo)    ).SetName("{m}(ConstructorInfo)"),
-                new TestCaseData(typeof(PropertyInfo)       ).SetName("{m}(PropertyInfo)"),
-                new TestCaseData(typeof(MethodInfo)         ).SetName("{m}(MethodInfo)")
+                new TestCaseData(typeof(int)    ).SetName("{m}(Int32)"),
+                new TestCaseData(typeof(string) ).SetName("{m}(String)"),
+                new TestCaseData(typeof(object) ).SetName("{m}(Object)"),
             };
 
         [TestCaseSource(nameof(Always_TestCaseData))]
@@ -31,9 +28,8 @@ namespace SeqLoggerProvider.Test.Extensions.System.Text.Json.Serialization.Membe
                 .Invoke(null, null);
 
         private static void Always_ThrowsException<T>()
-            where T : MemberInfo
         {
-            var uut = new global::System.Text.Json.Serialization.MemberInfoWriteOnlyJsonConverter<Type>();
+            var uut = Mock.Of<global::System.Text.Json.Serialization.WriteOnlyJsonConverter<T>>();
 
             Should.Throw<NotSupportedException>(() =>
             {

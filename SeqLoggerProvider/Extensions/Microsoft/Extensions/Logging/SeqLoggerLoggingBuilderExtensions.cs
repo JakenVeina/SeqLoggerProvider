@@ -76,7 +76,14 @@ namespace Microsoft.Extensions.Logging
                     .AddOptions<JsonSerializerOptions>()
                     .Configure(options =>
                     {
-                        options.Converters.Add(new MemberInfoWriteOnlyJsonConverterFactory()); // System.Text.Json doesn't support serializing Type and other System.Reflection objects.
+                        // System.Text.Json doesn't support serializing Type and other System.Reflection objects.
+                        options.Converters.Add(new MemberInfoWriteOnlyJsonConverterFactory());
+
+                        // Seq runs on JavaScript, which supports `double` precision numbers only. https://github.com/datalust/seq-tickets/issues/216
+                        options.Converters.Add(new ValueToStringWriteOnlyJsonConverter<long>());    
+                        options.Converters.Add(new ValueToStringWriteOnlyJsonConverter<ulong>());
+                        options.Converters.Add(new ValueToStringWriteOnlyJsonConverter<decimal>());
+                        
                         options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
                     });
                 if (configureJsonSerializer is not null)

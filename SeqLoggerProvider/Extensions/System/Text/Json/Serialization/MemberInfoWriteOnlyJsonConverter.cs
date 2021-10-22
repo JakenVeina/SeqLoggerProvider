@@ -2,18 +2,12 @@
 
 namespace System.Text.Json.Serialization
 {
-    class MemberInfoWriteOnlyJsonConverter<T>
-            : JsonConverter<T>
+    internal sealed class MemberInfoWriteOnlyJsonConverter<T>
+            : WriteOnlyJsonConverter<T>
         where T : MemberInfo
     {
         public override bool CanConvert(Type typeToConvert)
             => typeof(T).IsAssignableFrom(typeToConvert);
-
-        public override T? Read(
-                ref Utf8JsonReader      reader,
-                Type                    typeToConvert,
-                JsonSerializerOptions   options)
-            => throw new NotSupportedException();
 
         public override void Write(
                 Utf8JsonWriter          writer,
